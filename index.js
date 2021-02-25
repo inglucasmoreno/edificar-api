@@ -28,8 +28,8 @@ app.use(express.static('public'));
 // [Rutas]
 app.get('/', (req, res) => res.json({welcome: 'Bienvenidos a Equinoccio Technology'}));
 app.use('/api/reportes', require('./routes/reportes.routes'));
-// app.use('/api/usuarios', require('./routes/usuarios.routes'));
-// app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/usuarios', require('./routes/usuarios.routes'));
+app.use('/api/auth', require('./routes/auth.routes'));
 
 // [Necesario para no perder la ruta en produccion]
 app.get('*', (req, res) => {

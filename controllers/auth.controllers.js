@@ -13,14 +13,14 @@ const login = async (req, res) => {
 
         // Se verifica si el usuario existe
         const usuarioDB = await Usuario.findOne({dni});
-        if(!usuarioDB) return error(res, 400, 'Datos incorrectos');
+        if(!usuarioDB) return error(res, 400, 'Los datos son incorrectos');
         
         // Se verifica password
         const validPassword = bcryptjs.compareSync(password, usuarioDB.password);
-        if(!validPassword) return error(res, 400, 'Datos incorrectos'); 
+        if(!validPassword) return error(res, 400, 'Los datos son incorrectos'); 
         
         // Se verifica si el usuario esta activo
-        if(!usuarioDB.activo) return error(res, 400, 'Datos incorrectos');
+        if(!usuarioDB.activo) return error(res, 400, 'Los datos son incorrectos');
 
         // Se genera el token
         const token = await generarJWT(usuarioDB._id);

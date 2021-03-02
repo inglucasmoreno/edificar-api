@@ -21,26 +21,39 @@ const getUsuario = async (req, res) => {
 // Listar usuarios
 const listarUsuarios = async (req, res) => {
 
-    try{
+    try{    
         // Se prepara el filtrado
         const desde = Number(req.query.desde) || 0;
         const limit = Number(req.query.limit) || 0;
+        const filtroParametro = req.query.parametro || '';
         const filtroActivo = req.query.activo || '';
-        const filtroDni = req.query.dni || '';
-
+        
+        // Busqueda Normal
         const busqueda = {};
         if(filtroActivo) busqueda.activo = filtroActivo;
-        if(filtroDni){
-            const regex = new RegExp(filtroDni, 'i'); // Expresion regular para busqueda insensible
-            busqueda.dni = regex;
+
+        let filtroNombre = {};
+        let filtroApellido = {};
+        let filtroDni = {};
+
+        // Busqueda OR - Nombre, Apellido, DNI
+        if(filtroParametro){
+            const parametro = new RegExp(filtroParametro, 'i'); // Expresion regular para busqueda insensible
+            filtroNombre = { nombre: parametro };
+            filtroApellido = { apellido: parametro };
+            filtroDni = { dni: parametro };
+            filtroRol = { role: parametro };
         }
 
         const [usuarios, total] = await Promise.all([
-            Usuario.find(busqueda, 'dni apellido nombre role email activo')
+            Usuario.find(busqueda, 'dni apellido nombre role email activo createdAt')
+                   .or(filtroNombre).or(filtroApellido).or(filtroDni)
                    .skip(desde)
                    .limit(limit)
                    .sort({apellido: 1}),
-            Usuario.find(busqueda).countDocuments()
+            Usuario.find(busqueda)
+                   .or(filtroNombre).or(filtroApellido).or(filtroDni)
+                   .countDocuments()
         ]);
         
         success(res, { usuarios, total });

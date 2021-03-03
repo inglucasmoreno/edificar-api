@@ -21,14 +21,18 @@ const getUsuario = async (req, res) => {
 // Listar usuarios
 const listarUsuarios = async (req, res) => {
 
-    try{    
+    try{ 
+        
+        // Ordenar
+        let ordenar = [req.query.columna || 'apellido', req.query.direccion || 1];
+
         // Se prepara el filtrado
         const desde = Number(req.query.desde) || 0;
         const limit = Number(req.query.limit) || 0;
         const filtroParametro = req.query.parametro || '';
         const filtroActivo = req.query.activo || '';
         
-        // Busqueda Normal
+        // Filtro Normal
         const busqueda = {};
         if(filtroActivo) busqueda.activo = filtroActivo;
 
@@ -36,7 +40,7 @@ const listarUsuarios = async (req, res) => {
         let filtroApellido = {};
         let filtroDni = {};
 
-        // Busqueda OR - Nombre, Apellido, DNI
+        // Filtro por OR - Nombre, Apellido, DNI
         if(filtroParametro){
             const parametro = new RegExp(filtroParametro, 'i'); // Expresion regular para busqueda insensible
             filtroNombre = { nombre: parametro };
@@ -50,7 +54,8 @@ const listarUsuarios = async (req, res) => {
                    .or(filtroNombre).or(filtroApellido).or(filtroDni)
                    .skip(desde)
                    .limit(limit)
-                   .sort({apellido: 1}),
+                //    .sort({apellido: 1}),
+                    .sort([ordenar]),
             Usuario.find(busqueda)
                    .or(filtroNombre).or(filtroApellido).or(filtroDni)
                    .countDocuments()

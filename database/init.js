@@ -1,3 +1,4 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const brcrypt = require('bcryptjs');
 const chalk = require('chalk');
@@ -48,7 +49,7 @@ const initialization = async () => {
         bdConnection();
 
         // Inicializacion de usuarios
-        initUsers();
+        await initUsers();
 
         console.log(chalk.green('[Equinoccio Technology]') + ' - Inicializacion completada');
         

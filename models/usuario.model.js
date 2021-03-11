@@ -46,7 +46,7 @@ const usuarioSchema = Schema({
         default: true
     }
 
-}, { timestamps: true });
+}, { timestamps: true } );
 
 usuarioSchema.method('toJSON', function(){
     const {__v, _id, password, ...object} = this.toObject();

@@ -26,9 +26,11 @@ const listarUsuarios = async (req, res) => {
         // Ordenar
         let ordenar = [req.query.columna || 'apellido', req.query.direccion || 1];
 
-        // Se prepara el filtrado
+        // Paginacion
         const desde = Number(req.query.desde) || 0;
         const limit = Number(req.query.limit) || 0;
+        
+        // Se prepara el filtrado
         const filtroParametro = req.query.parametro || '';
         const filtroActivo = req.query.activo || '';
         
@@ -51,7 +53,9 @@ const listarUsuarios = async (req, res) => {
 
         const [usuarios, total] = await Promise.all([
             Usuario.find(busqueda, 'dni apellido nombre role email activo createdAt')
-                   .or(filtroNombre).or(filtroApellido).or(filtroDni)
+                   .or(filtroNombre)
+                   .or(filtroApellido)
+                   .or(filtroDni)
                    .skip(desde)
                    .limit(limit)
                 //    .sort({apellido: 1}),

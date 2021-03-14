@@ -18,6 +18,6 @@ router.post('/',[
     check('descripcion', 'La descripción es obligatoria').not().isEmpty(),
     validarCampos
 ], nuevaUnidad);
-router.put('/:id', actualizarUnidad);
+router.put('/:id', validarJWT, actualizarUnidad);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
+const { validarJWT } = require('../middleware/validar-jwt');
 const {
     nuevoProducto, 
     listarProductos,
@@ -9,9 +10,9 @@ const {
 
 const router = Router();
 
-router.get('/', listarProductos);
-router.get('/:id', getProducto);
-router.post('/', [
+router.get('/', validarJWT, listarProductos);
+router.get('/:id', validarJWT, getProducto);
+router.post('/', validarJWT, [
     check('codigo', 'Codigo es un campo obligatorio').not().isEmpty(),
     check('descripcion', 'Descripcion es un campo obligatorio').not().isEmpty(),
     check('unidad_medida', 'Unidad de medida es un campo obligatorio').not().isEmpty(),
@@ -19,7 +20,7 @@ router.post('/', [
     check('stock_minimo', 'Stock minimo es un campo obligatorio').not().isEmpty(),
     check('precio', 'Precio es un campo obligatorio').not().isEmpty(),
 ] ,nuevoProducto);
-router.put('/:id', actualizarProducto);
+router.put('/:id', validarJWT, actualizarProducto);
 
 
 module.exports = router;

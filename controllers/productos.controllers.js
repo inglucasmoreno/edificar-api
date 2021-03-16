@@ -54,7 +54,8 @@ const listarProductos = async (req, res) => {
         // Etapa 2 - Filtrado por descripcion
         if(req.query.descripcion){
             const regex = new RegExp(req.query.descripcion, 'i'); // Expresion regular para busqueda insensible
-            pipeline.push({$match: {descripcion: regex}});
+            // pipeline.push({$match: { $or: [{ descripcion: regex }, { codigo: regex }] }});
+            pipeline.push({$match: { $or: [{ descripcion: regex }] }});
             busqueda['descripcion'] = regex;            
         }
 
@@ -77,7 +78,7 @@ const listarProductos = async (req, res) => {
             }},
         );
         pipeline.push({ $unwind: '$unidad_medida' });
-
+        
         // Etapa 5 -  Paginación
         const desde = req.query.desde ? Number(req.query.desde) : 0;
         const limit = req.query.limit ? Number(req.query.limit) : 0;       
@@ -90,7 +91,7 @@ const listarProductos = async (req, res) => {
             ordenar[req.query.columna] = Number(req.query.direccion); 
             pipeline.push({$sort: ordenar});
         }
-
+ 
         // Se obtienen los datos
         const [productos, total] = await Promise.all([
             Producto.aggregate(pipeline),

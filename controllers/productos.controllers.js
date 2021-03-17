@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const {error, success} = require('../helpers/response');
+const { aggregate } = require('../models/producto.model');
 const Producto = require('../models/producto.model');
 
 // Nuevo usuario
@@ -25,7 +26,8 @@ const nuevoProducto = async (req, res) => {
 // Producto por ID
 const getProducto = async (req, res) => {   
     try{
-        const producto = await Producto.findById(req.params.id);
+        const producto = await Producto.findById(req.params.id)
+                                       .populate('unidad_medida', 'descripcion')
         if(!producto) return error(400, 'El producto no existe');
         success(res, { producto });
     }catch(err){
@@ -50,13 +52,18 @@ const listarProductos = async (req, res) => {
             pipeline.push({$match: {codigo: regex}});
             busqueda['codigo'] = regex;            
         }
-
-        // Etapa 2 - Filtrado por descripcion
+        
+        // Etapa 2 - Filtrado por descripcion o codigo
+        let filtroCodigo = {};
+        let filtroDescripcion = {};
+        
         if(req.query.descripcion){
             const regex = new RegExp(req.query.descripcion, 'i'); // Expresion regular para busqueda insensible
-            // pipeline.push({$match: { $or: [{ descripcion: regex }, { codigo: regex }] }});
-            pipeline.push({$match: { $or: [{ descripcion: regex }] }});
-            busqueda['descripcion'] = regex;            
+            pipeline.push({$match: { $or: [{ descripcion: regex }, { codigo: regex }] }});
+            // pipeline.push({$match: { $or: [{ descripcion: regex }] }});
+            // busqueda['descripcion'] = regex;  
+            filtroCodigo = { codigo: regex };
+            filtroDescripcion = { descripcion: regex };          
         }
 
         // Etapa 3 - Filtrado por activo/inactivo
@@ -91,14 +98,18 @@ const listarProductos = async (req, res) => {
             ordenar[req.query.columna] = Number(req.query.direccion); 
             pipeline.push({$sort: ordenar});
         }
- 
+        
         // Se obtienen los datos
         const [productos, total] = await Promise.all([
             Producto.aggregate(pipeline),
-            Producto.find(busqueda).countDocuments()    
+            Producto.find(busqueda)
+                    .or(filtroCodigo)
+                    .or(filtroDescripcion)
+                    .countDocuments()    
         ]);
 
         success(res, { productos, total });    
+
     }catch(err){
         console.log(chalk.red(err));
         error(res, 500);

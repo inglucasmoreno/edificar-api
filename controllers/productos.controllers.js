@@ -120,16 +120,17 @@ const listarProductos = async (req, res) => {
 const actualizarProducto = async (req, res) => {
     try{
         const { id } = req.params;
-        let producto = Producto.findById(id);
+        let producto = await Producto.findById(id);
 
         // Se verifica si el producto a actualizar exite
         if(!producto) return error(res, 400, 'El producto no existe');
         
         // Se verifica si el nuevo codigo ya esta registrado
         if(req.body.codigo){
-            const codigoExiste = await Producto.findOne({ codigo: req.body.codigo.toUpperCase() });
-            console.log(codigoExiste);
-            if(codigoExiste) return error(res, 400, 'El codigo ya esta registrado');
+            if(req.body.codigo.toUpperCase() !== producto.codigo.toUpperCase()){
+                const codigoExiste = await Producto.findOne({ codigo: req.body.codigo.toUpperCase() });
+                if(codigoExiste) return error(res, 400, 'El codigo ya esta registrado');
+            }
         }
         
         producto = await Producto.findByIdAndUpdate(id, req.body, { new: true });

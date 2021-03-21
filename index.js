@@ -17,7 +17,6 @@ const api_port = process.env.PORT || 3000;
 
 // [Base de datos] - MongoDB
 const dbConnection = require('./database/config');
-const { captureRejectionSymbol } = require('events');
 dbConnection();
 
 // [Configuraciones]
@@ -31,7 +30,10 @@ app.use('/api/reportes', require('./routes/reportes.routes'));
 app.use('/api/usuarios', require('./routes/usuarios.routes'));
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/unidad_medida', require('./routes/unidad_medida.routes'));
+app.use('/api/proveedores', require('./routes/proveedores.routes'));
 app.use('/api/productos', require('./routes/productos.routes'));
+app.use('/api/ingresos', require('./routes/ingreso_productos.routes'));
+app.use('/api/egresos', require('./routes/egreso.productos.routes'));
 
 // [Necesario para no perder la ruta en produccion]
 app.get('*', (req, res) => {

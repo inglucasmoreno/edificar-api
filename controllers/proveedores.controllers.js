@@ -39,6 +39,8 @@ const listarProveedores = async (req, res) => {
             const descripcion = new RegExp(fDescripcion, 'i'); // Expresion regular para busqueda insensible
             filtroOR.push({razon_social: descripcion});
             filtroOR.push({cuit: descripcion});
+        }else{
+            filtroOR.push({});
         }
 
         const [ proveedores, total ] = await Promise.all([

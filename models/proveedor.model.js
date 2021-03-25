@@ -17,6 +17,13 @@ const proveedorSchema = Schema({
         required: 'El CUIT es un campo obligatorio'
     },
 
+    domicilio: {
+        type: String,
+        trim: true,
+        uppercase: true,
+        default: 'SIN DOMICILIO'
+    },
+
     activo: {
         type: Boolean,
         default: true

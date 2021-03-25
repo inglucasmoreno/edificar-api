@@ -3,6 +3,18 @@ const {error, success} = require('../helpers/response');
 const Producto = require('../models/producto.model');
 const Egreso = require('../models/egreso_producto.model');
 
+// Egreso por ID
+const getEgreso = async (req, res) => {
+    try{
+        const { id } = req.params;
+        const egreso = await Egreso.findById(id);
+        if(!egreso) return error(res, 400, 'El egreso no existe');
+        success(res, { egreso });
+    }catch(err){
+        console.log(chalk.red(err));
+        error(res, 500);
+    }
+};
 
 // Listar egresos
 const listarEgresos = async (req, res) => {
@@ -58,6 +70,21 @@ const listarEgresos = async (req, res) => {
     }
 }
 
+// Actualizar egreso (No afecta a productos)
+const actualizarEgreso = async (req, res) => {
+    try{
+        const { id } = req.params;
+        const egresoBD = await Egreso.findById(id);
+        if(!egresoBD) return error(res, 400, 'El egreso no existe');
+        const egreso = await Egreso.findByIdAndUpdate(id, req.body);
+        success(res, { egreso });
+    }catch(err){
+        console.log(chalk.red(err));
+        error(res, 500);
+    }
+}
+
+
 // Nueva nota de venta (Sin productos)
 const nuevoEgreso = async (req, res) => {
     try{
@@ -81,6 +108,8 @@ const nuevoEgreso = async (req, res) => {
 }
 
 module.exports = {
+    getEgreso,
     listarEgresos,
-    nuevoEgreso
+    nuevoEgreso,
+    actualizarEgreso
 }

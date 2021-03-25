@@ -3,6 +3,19 @@ const {error, success} = require('../helpers/response');
 const Producto = require('../models/producto.model');
 const Ingreso = require('../models/ingreso_producto.model');
 
+// Ingreso por ID
+const getIngreso = async (req, res) => {
+    try{
+        const { id } = req.params;
+        const ingreso = await Ingreso.findById(id);
+        if(!ingreso) return error(res, 400, 'El ingreso no existe');
+        success(res, { ingreso });    
+    }catch(err){
+        console.log(chalk.red(err));
+        error(res, 500);
+    } 
+}
+
 // Listar ingresos
 const listarIngresos = async (req, res) => {
     try{
@@ -56,10 +69,10 @@ const listarIngresos = async (req, res) => {
 // Nuevo remito de ingreso (sin productos) 
 const nuevoIngreso = async (req, res) => {
     try{
-        const { cuit_proveedor, numero_remito } = req.body;
+        const { proveedor, numero_remito } = req.body;
         
         // Se verifica si el ingreso no esta repetido (CUIT y numero de remito)
-        const ingresoRepetido = await Ingreso.findOne({ numero_remito, cuit_proveedor });
+        const ingresoRepetido = await Ingreso.findOne({ numero_remito, proveedor });
         if(ingresoRepetido) return error(res, 400, 'El número de remito esta repetido');
 
         // Se crea el remito de ingreso
@@ -73,7 +86,33 @@ const nuevoIngreso = async (req, res) => {
     }
 }
 
+// Actualizar ingreso
+const actualizarIngreso = async (req, res) => {
+    try{
+        
+        const { id } = req.params;
+        const {numero_remito, proveedor} = req.body;
+        const ingresoBD = await Ingreso.findById(id);
+        if(!ingresoBD) return error(res, 400, 'El ingreso no existe');
+        
+        // Se verifica si el ingreso no esta repetido (CUIT y numero de remito)
+        if(numero_remito != ingresoBD.numero_remito || proveedor != ingresoBD.proveedor){
+            const ingresoRepetido = await Ingreso.findOne({ numero_remito, proveedor });
+            if(ingresoRepetido) return error(res, 400, 'El número de remito esta repetido');
+        }
+
+        const ingreso = await Ingreso.findByIdAndUpdate(id, req.body);
+        success(res, {ingreso});
+
+    }catch(err){
+        console.log(chalk.red(err));
+        error(res, 500);
+    }
+}
+
 module.exports = {
+    getIngreso,
     listarIngresos,
-    nuevoIngreso
+    nuevoIngreso,
+    actualizarIngreso
 }

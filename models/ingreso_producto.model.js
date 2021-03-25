@@ -43,6 +43,12 @@ const ingresoSchema = Schema({
     },
 
     // Datos de proveedor
+
+    proveedor: {    // Relacion con el proveedor
+        type: Schema.Types.ObjectId,
+        required: 'El proveedor es obligatorio'
+    },
+
     cuit_proveedor: {
         type: String,
         trim: true,

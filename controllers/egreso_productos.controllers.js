@@ -1,115 +1,112 @@
 const chalk = require('chalk');
+const mongoose = require('mongoose');
 const {error, success} = require('../helpers/response');
 const Producto = require('../models/producto.model');
-const Egreso = require('../models/egreso_producto.model');
+const Egreso = require('../models/egreso.model');
+const EgresoProducto = require('../models/egreso_productos.model');
 
-// Egreso por ID
-const getEgreso = async (req, res) => {
+// Nuevo producto -> Egreso
+const nuevoProducto = async (req, res) => {
     try{
-        const { id } = req.params;
-        const egreso = await Egreso.findById(id);
-        if(!egreso) return error(res, 400, 'El egreso no existe');
-        success(res, { egreso });
+        const {egreso, producto, cantidad} = req.body;
+
+         // Se verifica si el egreso existe
+         const egresoExiste = await Egreso.findById(egreso);
+         if(!egresoExiste) return error(res, 400, 'El egreso no existe');
+ 
+         // Se verifica si el producto existe
+         const productoExiste = await Producto.findById(producto);
+         if(!productoExiste) return error(res, 400, 'El producto no existe');
+ 
+         // La cantidad debe ser un numero
+         if(typeof(cantidad) != 'number') return error(res, 400, 'La cantidad debe ser un numero');
+ 
+         // La cantidad debe ser mayor que 0
+         if(cantidad < 0) return error(res, 400, 'La cantidad debe ser un numero mayor a 0');
+ 
+         const nuevoProducto = new EgresoProducto(req.body);
+         const resultado = await nuevoProducto.save();
+         success(res, { resultado });
     }catch(err){
         console.log(chalk.red(err));
         error(res, 500);
     }
-};
+}
 
-// Listar egresos
-const listarEgresos = async (req, res) => {
+// Listar productos por Egreso
+const listarPorEgreso = async (req, res) => {
     try{
-        // Ordenar
-        let ordenar = [ req.query.columna || 'createdAt', req.query.direccion || 1 ];
+        const { egreso } = req.params;
 
-        // Paginación
-        const desde = Number(req.query.desde) || 0;
-        const limit = Number(req.query.limit) || 0;
-
-        // Filtrado
+        // Variables de busqueda
         const busqueda = {};
-        let filtroOR = [];
+        let pipeline = [];
 
-        const fDescripcion = req.query.descripcion || '';
-        const fCodigo = req.query.codigo || '';
-        const fEstado = req.query.estado || '';
+        // Etapa 1 - Filtrar por Ingreso
+        pipeline.push({$match: { egreso: mongoose.Types.ObjectId(egreso) }});
+        busqueda['egreso'] = egreso;
 
-        // Filtro estado
-        if(fEstado) busqueda.estado = fEstado;
-        
-        // Filtro codigo
-        if(fCodigo) busqueda.codigo = fCodigo;
+        // Etapa 2 - LookUp - Ingreso
+        pipeline.push(
+            { $lookup: { 
+                from: 'egresos',
+                localField: 'egreso',
+                foreignField: '_id',
+                as: 'egreso'
+            }},
+        );
+        pipeline.push({ $unwind: '$egreso' });
 
-        // Filtro OR
-        if(fDescripcion){
-            const descripcion = new RegExp(fDescripcion, 'i'); // Expresion regular para busqueda insensible
-            filtroOR.push({descripcion_cliente: descripcion});
-            filtroOR.push({tipo_identificacion_cliente: descripcion});
-            filtroOR.push({identificacion_cliente: descripcion});
-        }else{
-            filtroOR.push({}); // Todos los resultados
+        // Etapa 3 - LookUp - Producto
+        pipeline.push(
+            { $lookup: { // Lookup - Producto
+                from: 'productos',
+                localField: 'producto',
+                foreignField: '_id',
+                as: 'producto'
+            }},
+        );
+        pipeline.push({ $unwind: '$producto' });
+
+        // Etapa 4 - LookUp - Producto -> Unidad de medida
+        pipeline.push(
+            { $lookup: { // Lookup - Producto
+                from: 'unidad_medida',
+                localField: 'producto.unidad_medida',
+                foreignField: '_id',
+                as: 'producto.unidad_medida'
+            }},
+        );
+        pipeline.push({ $unwind: '$producto.unidad_medida' });
+
+         // Etapa 5 -  Paginación
+         const desde = req.query.desde ? Number(req.query.desde) : 0;
+         const limit = req.query.limit ? Number(req.query.limit) : 0;       
+         if(limit != 0) pipeline.push({$limit: limit});
+         pipeline.push({$skip: desde});
+
+        // Etapa 6 - Ordenando datos
+        const ordenar = {};
+        if(req.query.columna){
+            ordenar[req.query.columna] = Number(req.query.direccion); 
+            pipeline.push({$sort: ordenar});
         }
 
-        const [ egresos, total ] = await Promise.all([
-            Egreso.find(busqueda)
-                        .or(filtroOR)
-                        .sort([ordenar])
-                        .skip(desde)
-                        .limit(limit),
-            Egreso.find(busqueda)
-                        .or(filtroOR)
-                        .sort([ordenar])
-                        .countDocuments()
+        // Se obtienen los datos
+        const [productos, total] = await Promise.all([
+            EgresoProducto.aggregate(pipeline),
+            EgresoProducto.find(busqueda).countDocuments()
         ]);
 
-        success(res, { egresos, total });
-
+        success(res, { productos, total });
     }catch(err){
         console.log(chalk.red(err));
         error(res, 500);
     }
 }
 
-// Actualizar egreso (No afecta a productos)
-const actualizarEgreso = async (req, res) => {
-    try{
-        const { id } = req.params;
-        const egresoBD = await Egreso.findById(id);
-        if(!egresoBD) return error(res, 400, 'El egreso no existe');
-        const egreso = await Egreso.findByIdAndUpdate(id, req.body);
-        success(res, { egreso });
-    }catch(err){
-        console.log(chalk.red(err));
-        error(res, 500);
-    }
-}
-
-
-// Nueva nota de venta (Sin productos)
-const nuevoEgreso = async (req, res) => {
-    try{
-        
-        // Generacion de codigo de venta
-        const egresosDB = await Egreso.find().sort({createdAt: -1});
-        const ultimoEgreso = egresosDB[0];
-
-        if(!ultimoEgreso) req.body.codigo = '0';
-        else req.body.codigo = Number(ultimoEgreso.codigo) + 1;
-
-        // Se crea el documento de egreso
-        const egreso = new Egreso(req.body);
-        const resultado = await egreso.save();
-        success(res, { egreso: resultado });
-
-    }catch(err){
-        console.log(chalk.red(err));
-        error(res, 500);
-    }
-}
 
 module.exports = {
-    getEgreso,
-    listarEgresos,
-    nuevoEgreso,
-    actualizarEgreso
+    nuevoProducto,
+    listarPorEgreso
 }

@@ -7,7 +7,7 @@ const {
     nuevoEgreso, 
     listarEgresos,
     actualizarEgreso, 
-} = require('../controllers/egreso_productos.controllers');
+} = require('../controllers/egreso.controllers');
 
 const router = Router();
 

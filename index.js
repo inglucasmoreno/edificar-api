@@ -25,15 +25,16 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // [Rutas]
-app.get('/', (req, res) => res.json({welcome: 'Bienvenidos a Equinoccio Technology'}));
 app.use('/api/reportes', require('./routes/reportes.routes'));
 app.use('/api/usuarios', require('./routes/usuarios.routes'));
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/unidad_medida', require('./routes/unidad_medida.routes'));
 app.use('/api/proveedores', require('./routes/proveedores.routes'));
 app.use('/api/productos', require('./routes/productos.routes'));
-app.use('/api/ingresos', require('./routes/ingreso_productos.routes'));
-app.use('/api/egresos', require('./routes/egreso.productos.routes'));
+app.use('/api/ingresos', require('./routes/ingreso.routes'));
+app.use('/api/egresos', require('./routes/egreso.routes'));
+app.use('/api/ingreso_productos', require('./routes/ingreso_productos.routes'));
+app.use('/api/egreso_productos', require('./routes/egreso_productos.routes'));
 
 // [Necesario para no perder la ruta en produccion]
 app.get('*', (req, res) => {

@@ -1,118 +1,113 @@
 const chalk = require('chalk');
+const mongoose = require('mongoose');
 const {error, success} = require('../helpers/response');
 const Producto = require('../models/producto.model');
-const Ingreso = require('../models/ingreso_producto.model');
+const Ingreso = require('../models/ingreso.model');
+const IngresoProducto = require('../models/ingreso_productos.model');
 
-// Ingreso por ID
-const getIngreso = async (req, res) => {
+// Nuevo producto -> Ingreso
+const nuevoProducto = async (req, res) => {
     try{
-        const { id } = req.params;
-        const ingreso = await Ingreso.findById(id);
-        if(!ingreso) return error(res, 400, 'El ingreso no existe');
-        success(res, { ingreso });    
+        const {ingreso, producto, cantidad} = req.body;
+
+        // Se verifica si el ingreso existe
+        const ingresoExiste = await Ingreso.findById(ingreso);
+        if(!ingresoExiste) return error(res, 400, 'El ingreso no existe');
+
+        // Se verifica si el producto existe
+        const productoExiste = await Producto.findById(producto);
+        if(!productoExiste) return error(res, 400, 'El producto no existe');
+
+        // La cantidad debe ser un numero
+        if(typeof(cantidad) != 'number') return error(res, 400, 'La cantidad debe ser un numero');
+
+        // La cantidad debe ser mayor que 0
+        if(cantidad < 0) return error(res, 400, 'La cantidad debe ser un numero mayor a 0');
+
+        const nuevoProducto = new IngresoProducto(req.body);
+        const resultado = await nuevoProducto.save();
+        success(res, { resultado });
     }catch(err){
         console.log(chalk.red(err));
-        error(res, 500);
-    } 
+        error(res, 500)
+    }
 }
 
-// Listar ingresos
-const listarIngresos = async (req, res) => {
+// Listar productos por Ingreso
+const listarPorIngreso = async (req, res) => {
     try{
-        // Ordenar
-        let ordenar = [ req.query.columna || 'createdAt', req.query.direccion || 1 ];
+        const { ingreso } = req.params;
 
-        // Paginación
-        const desde = Number(req.query.desde) || 0;
-        const limit = Number(req.query.limit) || 0;
-
-        // Filtrado
+        // Variables de busqueda
         const busqueda = {};
-        let filtroOR = [];
-        
-        const fDescripcion = req.query.descripcion || '';
-        const fEstado = req.query.estado || '';
-        
-        // Filtro estado
-        if(fEstado) busqueda.estado = fEstado;
+        let pipeline = [];
 
-        // Filtro OR
-        if(fDescripcion){
-            const descripcion = new RegExp(fDescripcion, 'i'); // Expresion regular para busqueda insensible
-            filtroOR.push({razon_social_proveedor: descripcion});
-            filtroOR.push({numero_remito: descripcion});
-            filtroOR.push({cuit_proveedor: descripcion});
-        }else{
-            filtroOR.push({}); // Todos los resultados
+        // Etapa 1 - Filtrar por Ingreso
+        pipeline.push({$match: { ingreso: mongoose.Types.ObjectId(ingreso) }});
+        busqueda['ingreso'] = ingreso;
+
+        // Etapa 2 - LookUp - Ingreso
+        pipeline.push(
+            { $lookup: { 
+                from: 'ingresos',
+                localField: 'ingreso',
+                foreignField: '_id',
+                as: 'ingreso'
+            }},
+        );
+        pipeline.push({ $unwind: '$ingreso' });
+
+        // Etapa 3 - LookUp - Producto
+        pipeline.push(
+            { $lookup: { // Lookup - Producto
+                from: 'productos',
+                localField: 'producto',
+                foreignField: '_id',
+                as: 'producto'
+            }},
+        );
+        pipeline.push({ $unwind: '$producto' });
+
+        // Etapa 4 - LookUp - Producto -> Unidad de medida
+        pipeline.push(
+            { $lookup: { // Lookup - Producto
+                from: 'unidad_medida',
+                localField: 'producto.unidad_medida',
+                foreignField: '_id',
+                as: 'producto.unidad_medida'
+            }},
+        );
+        pipeline.push({ $unwind: '$producto.unidad_medida' });
+
+         // Etapa 5 -  Paginación
+         const desde = req.query.desde ? Number(req.query.desde) : 0;
+         const limit = req.query.limit ? Number(req.query.limit) : 0;       
+         if(limit != 0) pipeline.push({$limit: limit});
+         pipeline.push({$skip: desde});
+
+        // Etapa 6 - Ordenando datos
+        const ordenar = {};
+        if(req.query.columna){
+            ordenar[req.query.columna] = Number(req.query.direccion); 
+            pipeline.push({$sort: ordenar});
         }
 
-        const [ ingresos, total ] = await Promise.all([
-            Ingreso.find(busqueda)
-                        .or(filtroOR)
-                        .sort([ordenar])
-                        .skip(desde)
-                        .limit(limit),
-            Ingreso.find(busqueda)
-                        .or(filtroOR)
-                        .sort([ordenar])
-                        .countDocuments()
+        // Se obtienen los datos
+        const [productos, total] = await Promise.all([
+            IngresoProducto.aggregate(pipeline),
+            IngresoProducto.find(busqueda).countDocuments()
         ]);
 
-        success(res, { ingresos, total });
-
+        success(res, { productos, total });
     }catch(err){
         console.log(chalk.red(err));
         error(res, 500);
     }
 }
 
-// Nuevo remito de ingreso (sin productos) 
-const nuevoIngreso = async (req, res) => {
-    try{
-        const { proveedor, numero_remito } = req.body;
-        
-        // Se verifica si el ingreso no esta repetido (CUIT y numero de remito)
-        const ingresoRepetido = await Ingreso.findOne({ numero_remito, proveedor });
-        if(ingresoRepetido) return error(res, 400, 'El número de remito esta repetido');
-
-        // Se crea el remito de ingreso
-        const ingreso = new Ingreso(req.body);
-        const resultado = await ingreso.save();
-        success(res, { ingreso: resultado });
-
-    }catch(err){
-        console.log(chalk.red(err));
-        error(res, 500);
-    }
-}
-
-// Actualizar ingreso
-const actualizarIngreso = async (req, res) => {
-    try{
-        
-        const { id } = req.params;
-        const {numero_remito, proveedor} = req.body;
-        const ingresoBD = await Ingreso.findById(id);
-        if(!ingresoBD) return error(res, 400, 'El ingreso no existe');
-        
-        // Se verifica si el ingreso no esta repetido (CUIT y numero de remito)
-        if(numero_remito != ingresoBD.numero_remito || proveedor != ingresoBD.proveedor){
-            const ingresoRepetido = await Ingreso.findOne({ numero_remito, proveedor });
-            if(ingresoRepetido) return error(res, 400, 'El número de remito esta repetido');
-        }
-
-        const ingreso = await Ingreso.findByIdAndUpdate(id, req.body);
-        success(res, {ingreso});
-
-    }catch(err){
-        console.log(chalk.red(err));
-        error(res, 500);
-    }
-}
 
 module.exports = {
-    getIngreso,
-    listarIngresos,
-    nuevoIngreso,
-    actualizarIngreso
+    nuevoProducto,
+    listarPorIngreso
 }
+

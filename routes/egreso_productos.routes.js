@@ -3,14 +3,13 @@ const { check } = require('express-validator');
 const { validarJWT } = require('../middleware/validar-jwt');
 const { validarCampos } = require('../middleware/validar-campos');
 const { 
-    nuevoProducto, 
-    listarPorIngreso 
-} = require('../controllers/ingreso_productos.controllers');
+    nuevoProducto,
+    listarPorEgreso
+} = require('../controllers/egreso_productos.controllers');
 
 const router = Router();
 
-router.get('/:ingreso', listarPorIngreso);
+router.get('/:egreso', listarPorEgreso);
 router.post('/', nuevoProducto);
-
 
 module.exports = router;

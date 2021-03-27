@@ -46,6 +46,7 @@ const ingresoSchema = Schema({
 
     proveedor: {    // Relacion con el proveedor
         type: Schema.Types.ObjectId,
+        ref: 'proveedor',
         required: 'El proveedor es obligatorio'
     },
 

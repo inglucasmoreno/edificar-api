@@ -19,10 +19,10 @@ const nuevoProducto = async (req, res) => {
         if(!productoExiste) return error(res, 400, 'El producto no existe');
 
         // La cantidad debe ser un numero
-        if(typeof(cantidad) != 'number') return error(res, 400, 'La cantidad debe ser un numero');
+        // if(typeof(cantidad) != 'number') return error(res, 400, 'La cantidad debe ser un numero');
 
         // La cantidad debe ser mayor que 0
-        if(cantidad < 0) return error(res, 400, 'La cantidad debe ser un numero mayor a 0');
+        if(Number(cantidad) < 0) return error(res, 400, 'La cantidad debe ser un numero mayor a 0');
 
         const nuevoProducto = new IngresoProducto(req.body);
         const resultado = await nuevoProducto.save();
@@ -36,7 +36,7 @@ const nuevoProducto = async (req, res) => {
 // Listar productos por Ingreso
 const listarPorIngreso = async (req, res) => {
     try{
-        const { ingreso } = req.params;
+        const ingreso = req.params.id;
 
         // Variables de busqueda
         const busqueda = {};
@@ -105,9 +105,85 @@ const listarPorIngreso = async (req, res) => {
     }
 }
 
+// Ingreso parcial de producto
+const ingresoParcial = async (req, res) => {
+    try{
+
+        const id = req.params.id;
+
+        // Se verifica si el producto existe
+        const productoIngresoDB = await IngresoProducto.findById(id);
+        if(!productoIngresoDB) return error(res, 400, 'El producto no existe');
+
+        // Se impacta sobre el stock
+        await Producto.findByIdAndUpdate(productoIngresoDB.producto, { $inc: { cantidad: productoIngresoDB.cantidad} });
+
+        // Se actualiza el estado y la fecha del producto en ingreso
+        const resultado = await IngresoProducto.findByIdAndUpdate(id, {activo: false, fecha_ingreso: Date.now() });
+
+        success(res, { resultado });
+
+    }catch(err){
+        console.log()
+    }
+}
+
+// Eliminar producto de ingreso
+const eliminarProducto = async (req, res) => {
+    try{
+
+        const id = req.params.id;
+        
+        // Se verifica que el producto existe
+        const productoExiste = await IngresoProducto.findById(id);
+        if(!productoExiste) return error(res, 400, 'El producto no existe');
+        
+        // Se eliminar el producto del ingreso
+        const producto = await IngresoProducto.findByIdAndRemove(id);
+        success(res, producto);  
+    
+    }catch(err){
+        console.log(chalk.red(err));
+        error(res, 500);
+    }
+}
+
+
+// Completar igreso
+const completarIngreso = async (req, res) => {
+
+    try{
+
+        const ingreso = req.params.id;
+
+        // Se buscan los productos que faltan ingresar
+        const productos_ingreso = await IngresoProducto.find({ ingreso, activo: true }, 'producto cantidad');
+    
+        // Se opera sobre cada producto de forma individual
+        productos_ingreso.forEach( async elemento => {
+            // Se impacta sobre el stock
+            await Producto.findByIdAndUpdate(elemento.producto, { $inc: { cantidad: elemento.cantidad } });
+            // Se actualiza el estado y la fecha del producto en ingreso
+            await IngresoProducto.findByIdAndUpdate(elemento._id, {activo: false, fecha_ingreso: Date.now() });  
+        });
+
+        // Se completa el ingreso
+        const resultado = await Ingreso.findByIdAndUpdate(ingreso, { estado: 'Completado', activo: false, fecha_ingreso: Date.now() });
+
+        success(res, { resultado });
+
+    }catch(err){
+        console.log(chalk.red(err));
+        error(res, 500);
+    }
+
+}
 
 module.exports = {
     nuevoProducto,
-    listarPorIngreso
+    listarPorIngreso,
+    ingresoParcial,
+    eliminarProducto,
+    completarIngreso,
 }
 

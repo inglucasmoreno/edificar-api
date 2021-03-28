@@ -70,7 +70,7 @@ const egresoSchema = Schema({
     
     estado: {
         type: String,
-        default: 'En proceso'            
+        default: 'Pendiente'            
     },
 
     activo: {

@@ -18,8 +18,9 @@ const nuevoProducto = async (req, res) => {
         const productoExiste = await Producto.findById(producto);
         if(!productoExiste) return error(res, 400, 'El producto no existe');
 
-        // La cantidad debe ser un numero
-        // if(typeof(cantidad) != 'number') return error(res, 400, 'La cantidad debe ser un numero');
+        // Se verifica si el producto no esta repetido en el ingreso
+        const productoRepetido = await IngresoProducto.findOne({ingreso, producto, activo: true });
+        if(productoRepetido) return error(res, 400, 'El producto ya esta en el ingreso');
 
         // La cantidad debe ser mayor que 0
         if(Number(cantidad) < 0) return error(res, 400, 'La cantidad debe ser un numero mayor a 0');

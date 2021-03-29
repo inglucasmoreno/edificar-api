@@ -10,23 +10,29 @@ const nuevoProducto = async (req, res) => {
     try{
         const {egreso, producto, cantidad} = req.body;
 
-         // Se verifica si el egreso existe
-         const egresoExiste = await Egreso.findById(egreso);
-         if(!egresoExiste) return error(res, 400, 'El egreso no existe');
+        // Se verifica si el egreso existe
+        const egresoExiste = await Egreso.findById(egreso);
+        if(!egresoExiste) return error(res, 400, 'El egreso no existe');
+
+        // Se verifica si el producto existe
+        const productoExiste = await Producto.findById(producto);
+        if(!productoExiste) return error(res, 400, 'El producto no existe');
+
+        // Se verifica si el producto no esta repetido en el egreso
+        const productoRepetido = await EgresoProducto.findOne({egreso , producto, activo: true });
+        if(productoRepetido) return error(res, 400, 'El producto ya esta en el egreso');
+
+        // La cantidad debe ser mayor que 0
+        if(cantidad < 0) return error(res, 400, 'La cantidad debe ser un numero mayor a 0');
+
+        // La cantidad no puede ser mayor que el stock actual del producto
+        if(cantidad > productoExiste.cantidad) return error(res, 400, 'La cantidad es superior al stock actual');
+        
+        
  
-         // Se verifica si el producto existe
-         const productoExiste = await Producto.findById(producto);
-         if(!productoExiste) return error(res, 400, 'El producto no existe');
- 
-         // La cantidad debe ser un numero
-         if(typeof(cantidad) != 'number') return error(res, 400, 'La cantidad debe ser un numero');
- 
-         // La cantidad debe ser mayor que 0
-         if(cantidad < 0) return error(res, 400, 'La cantidad debe ser un numero mayor a 0');
- 
-         const nuevoProducto = new EgresoProducto(req.body);
-         const resultado = await nuevoProducto.save();
-         success(res, { resultado });
+        const nuevoProducto = new EgresoProducto(req.body);
+        const resultado = await nuevoProducto.save();
+        success(res, { resultado });
     }catch(err){
         console.log(chalk.red(err));
         error(res, 500);
@@ -105,8 +111,84 @@ const listarPorEgreso = async (req, res) => {
     }
 }
 
+// Ingreso parcial de producto
+const egresoParcial = async (req, res) => {
+    try{
+
+        const id = req.params.id;
+
+        // Se verifica si el producto existe
+        const productoEgresoDB = await EgresoProducto.findById(id);
+        if(!productoEgresoDB) return error(res, 400, 'El producto no existe');
+
+        // Se impacta sobre el stock
+        await Producto.findByIdAndUpdate(productoEgresoDB.producto, { $inc: { cantidad: -productoEgresoDB.cantidad} });
+
+        // Se actualiza el estado y la fecha del producto en egreso
+        const resultado = await EgresoProducto.findByIdAndUpdate(id, {activo: false, fecha_egreso: Date.now() });
+
+        success(res, { resultado });
+
+    }catch(err){
+        console.log()
+    }
+}
+
+// Eliminar producto de egreso
+const eliminarProducto = async (req, res) => {
+    try{
+
+        const id = req.params.id;
+        
+        // Se verifica que el producto existe
+        const productoExiste = await EgresoProducto.findById(id);
+        if(!productoExiste) return error(res, 400, 'El producto no existe');
+        
+        // Se eliminar el producto del egreso
+        const producto = await EgresoProducto.findByIdAndRemove(id);
+        success(res, producto);  
+    
+    }catch(err){
+        console.log(chalk.red(err));
+        error(res, 500);
+    }
+}
+
+// Completar egreso
+const completarEgreso = async (req, res) => {
+
+    try{
+
+        const egreso = req.params.id;
+
+        // Se buscan los productos que faltan ingresar
+        const productos_egreso = await EgresoProducto.find({ egreso, activo: true }, 'producto cantidad');
+    
+        // Se opera sobre cada producto de forma individual
+        productos_egreso.forEach( async elemento => {
+            // Se impacta sobre el stock
+            await Producto.findByIdAndUpdate(elemento.producto, { $inc: { cantidad: -elemento.cantidad } });
+            // Se actualiza el estado y la fecha del producto en egreso
+            await EgresoProducto.findByIdAndUpdate(elemento._id, {activo: false, fecha_egreso: Date.now() });  
+        });
+
+        // Se completa el ingreso
+        const resultado = await Egreso.findByIdAndUpdate(egreso, { estado: 'Completado', activo: false, fecha_egreso: Date.now() });
+
+        success(res, { resultado });
+
+    }catch(err){
+        console.log(chalk.red(err));
+        error(res, 500);
+    }
+
+}
+
 
 module.exports = {
     nuevoProducto,
-    listarPorEgreso
+    listarPorEgreso,
+    egresoParcial,
+    eliminarProducto,
+    completarEgreso
 }

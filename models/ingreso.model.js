@@ -42,26 +42,10 @@ const ingresoSchema = Schema({
         required: 'El numero de remito es un valor obligatorio'
     },
 
-    // Datos de proveedor
-
     proveedor: {    // Relacion con el proveedor
         type: Schema.Types.ObjectId,
         ref: 'proveedor',
         required: 'El proveedor es obligatorio'
-    },
-
-    cuit_proveedor: {
-        type: String,
-        trim: true,
-        uppercase: true,
-        required: 'El CUIT es un campo obligatorio'
-    },
-
-    razon_social_proveedor: {
-        type: String,
-        trim: true,
-        uppercase: true,
-        required: 'La razon social es obligatoria'        
     },
 
     fecha_ingreso: {

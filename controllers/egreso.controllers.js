@@ -30,21 +30,16 @@ const listarEgresos = async (req, res) => {
         let filtroOR = [];
 
         const fDescripcion = req.query.descripcion || '';
-        const fCodigo = req.query.codigo || '';
         const fEstado = req.query.estado || '';
 
         // Filtro estado
         if(fEstado) busqueda.estado = fEstado;
         
-        // Filtro codigo
-        if(fCodigo) busqueda.codigo = fCodigo;
-
         // Filtro OR
         if(fDescripcion){
             const descripcion = new RegExp(fDescripcion, 'i'); // Expresion regular para busqueda insensible
             filtroOR.push({descripcion_cliente: descripcion});
-            filtroOR.push({tipo_identificacion_cliente: descripcion});
-            filtroOR.push({identificacion_cliente: descripcion});
+            filtroOR.push({codigo: descripcion});
         }else{
             filtroOR.push({}); // Todos los resultados
         }

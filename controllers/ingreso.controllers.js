@@ -6,7 +6,9 @@ const Ingreso = require('../models/ingreso.model');
 const getIngreso = async (req, res) => {
     try{
         const { id } = req.params;
-        const ingreso = await Ingreso.findById(id);
+        const ingreso = await Ingreso.findById(id)
+                                     .populate('proveedor')
+                                    
         if(!ingreso) return error(res, 400, 'El ingreso no existe');
         success(res, { ingreso });    
     }catch(err){
@@ -50,7 +52,8 @@ const listarIngresos = async (req, res) => {
                         .or(filtroOR)
                         .sort([ordenar])
                         .skip(desde)
-                        .limit(limit),
+                        .limit(limit)
+                        .populate('proveedor'),
             Ingreso.find(busqueda)
                         .or(filtroOR)
                         .sort([ordenar])

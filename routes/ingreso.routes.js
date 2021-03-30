@@ -17,8 +17,7 @@ router.post('/',
 [   
     validarJWT,
     check('numero_remito', 'El numero de remito es obligatorio').not().isEmpty(),
-    check('cuit_proveedor', 'El CUIT del proveedor es obligatorio').not().isEmpty(),
-    check('razon_social_proveedor', 'La razon social del proveedor es obligatorio').not().isEmpty(),
+    check('proveedor', 'El proveedor es obligatorio').not().isEmpty(),
     validarCampos
 ], nuevoIngreso);
 router.put('/:id', validarJWT, actualizarIngreso);

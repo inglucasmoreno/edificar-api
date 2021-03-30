@@ -24,6 +24,12 @@ const proveedorSchema = Schema({
         default: 'SIN DOMICILIO'
     },
 
+    condicion_iva: {
+        type: String,
+        trim: true,
+        required: 'La condicion frente al IVA es obligatoria'
+    },  
+
     activo: {
         type: Boolean,
         default: true

@@ -17,6 +17,7 @@ router.post('/', [
     validarJWT,
     check('razon_social', 'Razon social es un campo obligatorio').not().isEmpty(),
     check('cuit', 'Cuit es un campo obligatorio').not().isEmpty(),
+    check('condicion_iva', 'La condicion frente al IVA es un campo obligatorio').not().isEmpty(),
     validarCampos  
 ], nuevoProveedor);
 router.put('/:id', validarJWT ,actualizarProveedor);

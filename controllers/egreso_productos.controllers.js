@@ -25,11 +25,6 @@ const nuevoProducto = async (req, res) => {
         // La cantidad debe ser mayor que 0
         if(cantidad < 0) return error(res, 400, 'La cantidad debe ser un numero mayor a 0');
 
-        // La cantidad no puede ser mayor que el stock actual del producto
-        if(cantidad > productoExiste.cantidad) return error(res, 400, 'La cantidad es superior al stock actual');
-        
-        
- 
         const nuevoProducto = new EgresoProducto(req.body);
         const resultado = await nuevoProducto.save();
         success(res, { resultado });

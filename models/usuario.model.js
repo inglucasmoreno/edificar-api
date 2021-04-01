@@ -12,12 +12,14 @@ const usuarioSchema = Schema({
     apellido: {
         type: String,
         required: true,
+        uppercase: true,
         trim: true,
     },
 
     nombre: {
         type: String,
         required: true,
+        uppercase: true,
         trim: true
     },
 
@@ -31,12 +33,14 @@ const usuarioSchema = Schema({
         type: String,
         required: true,
         trim: true,
+        uppercase: true,
         unique: true
     },
 
     role: {
         type: String,
         required: true,
+        uppercase: true,
         default: 'USER_ROLE'
     },
 

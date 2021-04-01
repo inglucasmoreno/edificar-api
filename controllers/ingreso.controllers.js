@@ -71,14 +71,34 @@ const listarIngresos = async (req, res) => {
 // Nuevo ingreso
 const nuevoIngreso = async (req, res) => {
     try{
-        const { proveedor, numero_remito } = req.body;
+        const { proveedor } = req.body;
+        let { punto_venta, nro_comprobante } = req.body;
+
+        // Se genera el numero de remito
+        const  r_punto_venta = 5 - punto_venta.length;
+        const  r_nro_comprobante = 8 - nro_comprobante.length;   
+        
+        let i = 0;
+        while(i < r_punto_venta){
+            punto_venta = '0' + punto_venta;
+            i++;
+        }
+
+        i = 0;
+        while(i < r_nro_comprobante){
+            nro_comprobante = '0' + nro_comprobante;
+            i++;
+        }
+
+        const numero_remito = `${punto_venta}-${nro_comprobante}`;        
+        const data = { numero_remito, proveedor };
         
         // Se verifica si el ingreso no esta repetido (CUIT y numero de remito)
         const ingresoRepetido = await Ingreso.findOne({ numero_remito, proveedor });
         if(ingresoRepetido) return error(res, 400, 'El número de remito esta repetido');
 
         // Se crea el remito de ingreso
-        const ingreso = new Ingreso(req.body);
+        const ingreso = new Ingreso(data);
         const resultado = await ingreso.save();
         success(res, { ingreso: resultado });
 

@@ -3,6 +3,7 @@ const { Schema, model } = require('mongoose');
 // Productos - Salida
 const productoSchema = Schema({
 
+    // Codigo en formato Number
     codigo: {
         type: Number,
         min: 0,
@@ -34,6 +35,20 @@ const productoSchema = Schema({
 
 // Nota de venta
 const egresoSchema = Schema({
+    
+    codigo: {
+        type: String,
+        trim: true,
+        uppercase: true,
+        required: 'El codigo de egreso es un campo obligatorio'
+    },
+
+    // Codigo en formato String - 8 Caracteres
+    codigo_cadena: {
+        type: String,
+        uppercase: true,
+        required: 'El codigo_muestra es obligatorio'
+    },
 
     descripcion_cliente: {
         type: String,
@@ -56,12 +71,6 @@ const egresoSchema = Schema({
         required: 'La identificacion del cliente es un campo obligatorio'        
     },
 
-    codigo: {
-        type: String,
-        trim: true,
-        uppercase: true,
-        required: 'El codigo de egreso es un campo obligatorio'
-    },
 
     fecha_egreso: {
         type: Date,

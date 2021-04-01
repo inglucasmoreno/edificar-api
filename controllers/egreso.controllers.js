@@ -85,10 +85,29 @@ const nuevoEgreso = async (req, res) => {
         // Generacion de codigo de venta
         const egresosDB = await Egreso.find().sort({createdAt: -1});
         const ultimoEgreso = egresosDB[0];
+    
+        if(!ultimoEgreso){
+            req.body.codigo = '0';
+            req.body.codigo_cadena = '00000000'
+        }else{
 
-        if(!ultimoEgreso) req.body.codigo = '0';
-        else req.body.codigo = Number(ultimoEgreso.codigo) + 1;
+            const nuevoCodigo = Number(ultimoEgreso.codigo) + 1; 
+      
+            // Se genera el codigo en formato string
+            let codigo_cadena = String(nuevoCodigo);
+            const repeticion = 8 - codigo_cadena.length;
+            
+            let i = 0;
+            while(i < repeticion ){
+                codigo_cadena = '0' + codigo_cadena;
+                i++;
+            }
 
+            req.body.codigo = nuevoCodigo;    
+            req.body.codigo_cadena = codigo_cadena;   
+            
+        } 
+        
         // Se crea el documento de egreso
         const egreso = new Egreso(req.body);
         const resultado = await egreso.save();

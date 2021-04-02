@@ -39,7 +39,7 @@ const listarEgresos = async (req, res) => {
         if(fDescripcion){
             const descripcion = new RegExp(fDescripcion, 'i'); // Expresion regular para busqueda insensible
             filtroOR.push({descripcion_cliente: descripcion});
-            filtroOR.push({codigo: descripcion});
+            filtroOR.push({codigo_cadena: descripcion});
         }else{
             filtroOR.push({}); // Todos los resultados
         }

@@ -20,47 +20,67 @@ const getIngreso = async (req, res) => {
 // Listar ingresos
 const listarIngresos = async (req, res) => {
     try{
-        // Ordenar
-        let ordenar = [ req.query.columna || 'createdAt', req.query.direccion || 1 ];
-
-        // Paginación
-        const desde = Number(req.query.desde) || 0;
-        const limit = Number(req.query.limit) || 0;
 
         // Filtrado
-        const busqueda = {};
-        let filtroOR = [];
-        
-        const fDescripcion = req.query.descripcion || '';
-        const fEstado = req.query.estado || '';
-        
-        // Filtro estado
-        if(fEstado) busqueda.estado = fEstado;
+        let pipeline = [];
+        let pipelineTotal = [];
 
-        // Filtro OR
-        if(fDescripcion){
-            const descripcion = new RegExp(fDescripcion, 'i'); // Expresion regular para busqueda insensible
-            filtroOR.push({razon_social_proveedor: descripcion});
-            filtroOR.push({numero_remito: descripcion});
-            filtroOR.push({cuit_proveedor: descripcion});
-        }else{
-            filtroOR.push({}); // Todos los resultados
+        // Etapa 1 - Filtrado por estado
+        if(req.query.estado){
+            pipeline.push({$match: {estado: req.query.estado}});
+            pipelineTotal.push({$match: {estado: req.query.estado}});
         }
 
-        const [ ingresos, total ] = await Promise.all([
-            Ingreso.find(busqueda)
-                        .or(filtroOR)
-                        .sort([ordenar])
-                        .skip(desde)
-                        .limit(limit)
-                        .populate('proveedor'),
-            Ingreso.find(busqueda)
-                        .or(filtroOR)
-                        .sort([ordenar])
-                        .countDocuments()
+        // Etapa 2 - Join (Proveedor)
+        pipeline.push(
+            { $lookup: { // Lookup - Tipos
+                from: 'proveedores',
+                localField: 'proveedor',
+                foreignField: '_id',
+                as: 'proveedor'
+            }},
+        );
+        
+        pipelineTotal.push(
+            { $lookup: { // Lookup - Tipos
+                from: 'proveedores',
+                localField: 'proveedor',
+                foreignField: '_id',
+                as: 'proveedor'
+            }},
+        );
+
+        pipeline.push({ $unwind: '$proveedor' });
+        pipelineTotal.push({ $unwind: '$proveedor' });        
+
+        // Etapa 3 - Filtrado por descripcion
+        // - Numero de remito | Razon social de proveedor | CUIT de proveedor
+        if(req.query.descripcion){
+            const descripcion = new RegExp(req.query.descripcion, 'i'); // Expresion regular para busqueda insensible
+            pipeline.push({$match: { $or: [{ numero_remito: descripcion }, { 'proveedor.razon_social' : descripcion }, {'proveedor.cuit': descripcion}] }});
+            pipelineTotal.push({$match: { $or: [{ numero_remito: descripcion }, { 'proveedor.razon_social' : descripcion }, {'proveedor.cuit': descripcion}] }});
+        }
+
+        // Etapa 4 -  Paginación
+        const desde = req.query.desde ? Number(req.query.desde) : 0;
+        const limit = req.query.limit ? Number(req.query.limit) : 0;       
+        if(limit != 0) pipeline.push({$limit: limit});
+        pipeline.push({$skip: desde});
+
+        // Etapa 5 - Ordenando datos
+        const ordenar = {};
+        if(req.query.columna){
+            ordenar[req.query.columna] = Number(req.query.direccion); 
+            pipeline.push({$sort: ordenar});
+        } 
+
+        const [ingresos, ingresosTotal] = await Promise.all([
+            Ingreso.aggregate(pipeline),
+            Ingreso.aggregate(pipelineTotal)
         ]);
 
-        success(res, { ingresos, total });
+        const total = ingresosTotal.length;
+        success(res, { ingresos, total});
 
     }catch(err){
         console.log(chalk.red(err));

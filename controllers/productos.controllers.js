@@ -1,6 +1,5 @@
 const chalk = require('chalk');
 const {error, success} = require('../helpers/response');
-const { aggregate } = require('../models/producto.model');
 const Producto = require('../models/producto.model');
 
 // Nuevo usuario
@@ -86,18 +85,18 @@ const listarProductos = async (req, res) => {
         );
         pipeline.push({ $unwind: '$unidad_medida' });
         
-        // Etapa 5 -  Paginación
-        const desde = req.query.desde ? Number(req.query.desde) : 0;
-        const limit = req.query.limit ? Number(req.query.limit) : 0;       
-        if(limit != 0) pipeline.push({$limit: limit});
-        pipeline.push({$skip: desde});
-
-        // Etapa 6 - Ordenando datos
+        // Etapa 5 - Ordenando datos
         const ordenar = {};
         if(req.query.columna){
             ordenar[req.query.columna] = Number(req.query.direccion); 
             pipeline.push({$sort: ordenar});
         }
+
+        // Etapa 6 -  Paginación
+        const desde = req.query.desde ? Number(req.query.desde) : 0;
+        const limit = req.query.limit ? Number(req.query.limit) : 0;       
+        if(limit != 0) pipeline.push({$limit: limit});
+        pipeline.push({$skip: desde});
         
         // Se obtienen los datos
         const [productos, total] = await Promise.all([

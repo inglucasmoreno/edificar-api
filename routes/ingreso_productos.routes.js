@@ -20,8 +20,18 @@ router.post('/', [
     check('cantidad', 'La cantidad es obligatorio').not().isEmpty(),
     validarCampos
 ], nuevoProducto);
-router.put('/parcial/:id', validarJWT, ingresoParcial);
-router.put('/completar/:id', validarJWT , completarIngreso);
+router.put('/parcial/:id', [
+    validarJWT,
+    check('documento_codigo', 'El codigo de documento es obligatorio').not().isEmpty(),
+    check('persona_empresa', 'La persona_empresa es obligatoria').not().isEmpty(),
+    validarCampos
+], ingresoParcial);
+router.put('/completar/:id', [
+    validarJWT,
+    check('documento_codigo', 'El codigo de documento es obligatorio').not().isEmpty(),
+    check('persona_empresa', 'La persona_empresa es obligatoria').not().isEmpty(),
+    validarCampos
+] , completarIngreso);
 router.delete('/:id', validarJWT, eliminarProducto);
 
 module.exports = router;

@@ -56,10 +56,9 @@ const listarUsuarios = async (req, res) => {
                    .or(filtroNombre)
                    .or(filtroApellido)
                    .or(filtroDni)
+                   .sort([ordenar])
                    .skip(desde)
-                   .limit(limit)
-                //    .sort({apellido: 1}),
-                    .sort([ordenar]),
+                   .limit(limit),
             Usuario.find(busqueda)
                    .or(filtroNombre).or(filtroApellido).or(filtroDni)
                    .countDocuments()

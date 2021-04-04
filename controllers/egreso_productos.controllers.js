@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const {error, success} = require('../helpers/response');
 const Producto = require('../models/producto.model');
 const Egreso = require('../models/egreso.model');
+const Trazabilidad = require('../models/trazabilidad.model');
+
 const EgresoProducto = require('../models/egreso_productos.model');
 
 // Nuevo producto -> Egreso
@@ -47,7 +49,16 @@ const listarPorEgreso = async (req, res) => {
         pipeline.push({$match: { egreso: mongoose.Types.ObjectId(egreso) }});
         busqueda['egreso'] = egreso;
 
-        // Etapa 2 - LookUp - Ingreso
+        // Etapa 2 - Filtrado por activo/inactivo
+        if(req.query.activo == 'true'){
+            pipeline.push({$match: { activo: true }});
+            busqueda['activo'] = true;
+        }else if(req.query.activo == 'false'){
+            pipeline.push({$match: { activo: false }}); 
+            busqueda['activo'] = false;
+        }
+
+        // Etapa 3 - LookUp - Ingreso
         pipeline.push(
             { $lookup: { 
                 from: 'egresos',
@@ -58,7 +69,7 @@ const listarPorEgreso = async (req, res) => {
         );
         pipeline.push({ $unwind: '$egreso' });
 
-        // Etapa 3 - LookUp - Producto
+        // Etapa 4 - LookUp - Producto
         pipeline.push(
             { $lookup: { // Lookup - Producto
                 from: 'productos',
@@ -69,7 +80,7 @@ const listarPorEgreso = async (req, res) => {
         );
         pipeline.push({ $unwind: '$producto' });
 
-        // Etapa 4 - LookUp - Producto -> Unidad de medida
+        // Etapa 5 - LookUp - Producto -> Unidad de medida
         pipeline.push(
             { $lookup: { // Lookup - Producto
                 from: 'unidad_medida',
@@ -80,18 +91,18 @@ const listarPorEgreso = async (req, res) => {
         );
         pipeline.push({ $unwind: '$producto.unidad_medida' });
 
-         // Etapa 5 -  Paginación
-         const desde = req.query.desde ? Number(req.query.desde) : 0;
-         const limit = req.query.limit ? Number(req.query.limit) : 0;       
-         if(limit != 0) pipeline.push({$limit: limit});
-         pipeline.push({$skip: desde});
-
         // Etapa 6 - Ordenando datos
         const ordenar = {};
         if(req.query.columna){
             ordenar[req.query.columna] = Number(req.query.direccion); 
             pipeline.push({$sort: ordenar});
         }
+
+        // Etapa 7 -  Paginación
+        const desde = req.query.desde ? Number(req.query.desde) : 0;
+        const limit = req.query.limit ? Number(req.query.limit) : 0;       
+        if(limit != 0) pipeline.push({$limit: limit});
+        pipeline.push({$skip: desde});
 
         // Se obtienen los datos
         const [productos, total] = await Promise.all([
@@ -116,8 +127,31 @@ const egresoParcial = async (req, res) => {
         const productoEgresoDB = await EgresoProducto.findById(id);
         if(!productoEgresoDB) return error(res, 400, 'El producto no existe');
 
+        const {producto, cantidad, egreso} = productoEgresoDB;
+
+        // Info de producto antes de actualizacion
+        const productoAnterior = await Producto.findById(producto, 'cantidad');
+        if(!productoAnterior) return error(res, 400, 'El producto no existe');
+
         // Se impacta sobre el stock
-        await Producto.findByIdAndUpdate(productoEgresoDB.producto, { $inc: { cantidad: -productoEgresoDB.cantidad} });
+        const productoActualizado = await Producto.findByIdAndUpdate(productoEgresoDB.producto, { $inc: { cantidad: -productoEgresoDB.cantidad} }, {new: true});
+
+        // Se impacta sobre la trazabilidad
+        const { documento_codigo, persona_empresa } = req.body;
+
+        const dataTrazabilidad = {
+            producto,
+            cantidad,
+            tipo: 'Egreso',
+            stock_anterior: productoAnterior.cantidad,
+            stock_nuevo: productoActualizado.cantidad,
+            documento: egreso,
+            documento_codigo,
+            persona_empresa 
+        }
+
+        const trazabilidad = Trazabilidad(dataTrazabilidad);
+        await trazabilidad.save();
 
         // Se actualiza el estado y la fecha del producto en egreso
         const resultado = await EgresoProducto.findByIdAndUpdate(id, {activo: false, fecha_egreso: Date.now() });
@@ -159,10 +193,33 @@ const completarEgreso = async (req, res) => {
         // Se buscan los productos que faltan ingresar
         const productos_egreso = await EgresoProducto.find({ egreso, activo: true }, 'producto cantidad');
     
+        // Se impacta sobre la trazabilidad
+        const { documento_codigo, persona_empresa } = req.body;
+
         // Se opera sobre cada producto de forma individual
         productos_egreso.forEach( async elemento => {
+            
+            // Info de producto antes de actualizacion
+            const productoAnterior = await Producto.findById(elemento.producto, 'cantidad');
+            if(!productoAnterior) return error(res, 400, 'El producto no existe');
+
             // Se impacta sobre el stock
-            await Producto.findByIdAndUpdate(elemento.producto, { $inc: { cantidad: -elemento.cantidad } });
+            const productoActualizado = await Producto.findByIdAndUpdate(elemento.producto, { $inc: { cantidad: -elemento.cantidad } }, {new: true});
+         
+            const dataTrazabilidad = {
+                producto: elemento.producto,
+                cantidad: elemento.cantidad,
+                tipo: 'Egreso',
+                stock_anterior: productoAnterior.cantidad,
+                stock_nuevo: productoActualizado.cantidad,
+                documento: egreso,
+                documento_codigo,
+                persona_empresa 
+            }
+
+            const trazabilidad = Trazabilidad(dataTrazabilidad);
+            await trazabilidad.save();
+          
             // Se actualiza el estado y la fecha del producto en egreso
             await EgresoProducto.findByIdAndUpdate(elemento._id, {activo: false, fecha_egreso: Date.now() });  
         });

@@ -61,18 +61,18 @@ const listarIngresos = async (req, res) => {
             pipelineTotal.push({$match: { $or: [{ numero_remito: descripcion }, { 'proveedor.razon_social' : descripcion }, {'proveedor.cuit': descripcion}] }});
         }
 
-        // Etapa 4 -  Paginación
-        const desde = req.query.desde ? Number(req.query.desde) : 0;
-        const limit = req.query.limit ? Number(req.query.limit) : 0;       
-        if(limit != 0) pipeline.push({$limit: limit});
-        pipeline.push({$skip: desde});
-
-        // Etapa 5 - Ordenando datos
+        // Etapa 4 - Ordenando datos
         const ordenar = {};
         if(req.query.columna){
             ordenar[req.query.columna] = Number(req.query.direccion); 
             pipeline.push({$sort: ordenar});
         } 
+
+        // Etapa 5 -  Paginación
+        const desde = req.query.desde ? Number(req.query.desde) : 0;
+        const limit = req.query.limit ? Number(req.query.limit) : 0;       
+        if(limit != 0) pipeline.push({$limit: limit});
+        pipeline.push({$skip: desde});
 
         const [ingresos, ingresosTotal] = await Promise.all([
             Ingreso.aggregate(pipeline),

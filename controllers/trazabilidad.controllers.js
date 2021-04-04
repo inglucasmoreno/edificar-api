@@ -8,7 +8,7 @@ const Trazabilidad = require('../models/trazabilidad.model');
 const listarTrazabilidad = async (req, res) => {
     try{
 
-        const { producto, tipo, parametro } = req.query;
+        const { producto, tipo, parametro, fechaAntes, fechaDespues } = req.query;
 
         const pipeline = [];
         const pipelineTotal = [];
@@ -27,16 +27,31 @@ const listarTrazabilidad = async (req, res) => {
             pipelineTotal.push({$match: { producto: mongoose.Types.ObjectId(producto) }});
         } 
 
-        pipeline.push({$match: { createdAt: { $gte: moment() } }});
+        console.log(new Date(fechaAntes));
+        console.log(new Date(fechaDespues));
 
-        // Etapa 3 - Filtrado por parametro
+        // despues ------------------------------ Antes
+
+        // Etapa 3 - Filtrado por fechas    
+        if(fechaDespues){
+            pipeline.push({$match: { createdAt: { $lte: new Date(fechaDespues) } }});
+            pipelineTotal.push({$match: { createdAt: { $lte: new Date(fechaDespues) } }});
+        }
+       
+        if(fechaAntes){
+            pipeline.push({$match: { createdAt: { $gte: new Date(fechaAntes) } }});
+            pipelineTotal.push({$match: { createdAt: { $gte: new Date(fechaAntes) } }});
+        }
+
+
+        // Etapa 4 - Filtrado por parametro
         if(parametro) {
             const descripcion = new RegExp(req.query.parametro, 'i'); // Expresion regular para busqueda insensible
             pipeline.push({$match: {persona_empresa: descripcion}});
             pipelineTotal.push({$match: {persona_empresa: descripcion}});
         } 
         
-        // Etapa 4 - Join (Producto)     
+        // Etapa 5 - Join (Producto)     
         pipeline.push(
             { $lookup: { // Lookup - Tipos
                 from: 'productos',
@@ -49,18 +64,17 @@ const listarTrazabilidad = async (req, res) => {
         
         const ordenar = {};    
         
-        // Etapa 5 - Ordenando datos
+        // Etapa 6 - Ordenando datos
         if(req.query.columna){
             ordenar[req.query.columna] = Number(req.query.direccion); 
             pipeline.push({$sort: ordenar});
         }
 
-        // Etapa 6 -  Paginación
+        // Etapa 7 -  Paginación
         const desde = req.query.desde ? Number(req.query.desde) : 0;
         const limit = req.query.limit ? Number(req.query.limit) : 0;       
         if(limit != 0) pipeline.push({$limit: limit});
         pipeline.push({$skip: desde});
-
 
         // Se genera la salida  
         const [trazabilidad, trazabilidadTotal] = await Promise.all([
@@ -68,8 +82,6 @@ const listarTrazabilidad = async (req, res) => {
             Trazabilidad.aggregate(pipelineTotal)
         ])
         
-        console.log(trazabilidad);
-
         const total = trazabilidadTotal.length;
 
         success(res, { trazabilidad, total });

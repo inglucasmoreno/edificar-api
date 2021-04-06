@@ -5,6 +5,7 @@ const moment = require('moment');
 
 const Trazabilidad = require('../models/trazabilidad.model');
 
+// Listar elementos de trazabilidad
 const listarTrazabilidad = async (req, res) => {
     try{
 
@@ -26,23 +27,18 @@ const listarTrazabilidad = async (req, res) => {
             pipeline.push({$match: { producto: mongoose.Types.ObjectId(producto) }});
             pipelineTotal.push({$match: { producto: mongoose.Types.ObjectId(producto) }});
         } 
-
-        console.log(new Date(fechaAntes));
-        console.log(new Date(fechaDespues));
-
-        // despues ------------------------------ Antes
-
-        // Etapa 3 - Filtrado por fechas    
+    
+        // Etapa 3 - Filtrado por rango de fechas [Despues - Antes]    
         if(fechaDespues){
-            pipeline.push({$match: { createdAt: { $lte: new Date(fechaDespues) } }});
-            pipelineTotal.push({$match: { createdAt: { $lte: new Date(fechaDespues) } }});
+            pipeline.push({$match: { createdAt: { $gte: new Date(fechaDespues) } }});
+            pipelineTotal.push({$match: { createdAt: { $gte: new Date(fechaDespues) } }});
         }
-       
+        
         if(fechaAntes){
-            pipeline.push({$match: { createdAt: { $gte: new Date(fechaAntes) } }});
-            pipelineTotal.push({$match: { createdAt: { $gte: new Date(fechaAntes) } }});
+            const fechaAntesMod = moment(fechaAntes).add(1, 'days');
+            pipeline.push({$match: { createdAt: { $lte: new Date(fechaAntesMod) } }});
+            pipelineTotal.push({$match: { createdAt: { $lte: new Date(fechaAntesMod) } }});
         }
-
 
         // Etapa 4 - Filtrado por parametro
         if(parametro) {

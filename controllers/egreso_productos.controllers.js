@@ -105,12 +105,13 @@ const listarPorEgreso = async (req, res) => {
         pipeline.push({$skip: desde});
 
         // Se obtienen los datos
-        const [productos, total] = await Promise.all([
+        const [productos, total, totalGeneral] = await Promise.all([
             EgresoProducto.aggregate(pipeline),
-            EgresoProducto.find(busqueda).countDocuments()
+            EgresoProducto.find(busqueda).countDocuments(),
+            EgresoProducto.find({ egreso }).countDocuments()
         ]);
-
-        success(res, { productos, total });
+        
+        success(res, { productos, total, totalGeneral });
     }catch(err){
         console.log(chalk.red(err));
         error(res, 500);

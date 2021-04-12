@@ -104,12 +104,13 @@ const listarPorIngreso = async (req, res) => {
         pipeline.push({$skip: desde});
 
         // Se obtienen los datos
-        const [productos, total] = await Promise.all([
+        const [productos, total, totalGeneral] = await Promise.all([
             IngresoProducto.aggregate(pipeline),
-            IngresoProducto.find(busqueda).countDocuments()
+            IngresoProducto.find(busqueda).countDocuments(),
+            IngresoProducto.find({ingreso}).countDocuments()
         ]);
 
-        success(res, { productos, total });
+        success(res, { productos, total, totalGeneral });
     }catch(err){
         console.log(chalk.red(err));
         error(res, 500);

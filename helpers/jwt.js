@@ -5,7 +5,7 @@ const generarJWT = (uid) => {
     return new Promise((resolve, reject) => {
         const payload = { uid };
         jwt.sign(payload, process.env.JWT_SECRET || 'EquinoccioKey', {
-            expiresIn: '1h'
+            expiresIn: '5h'
         }, (err, token) => {
             if(err){
                 console.log(chalk.red(err));

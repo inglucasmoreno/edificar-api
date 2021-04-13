@@ -66,6 +66,7 @@ const listarTrazabilidad = async (req, res) => {
             pipeline.push({$sort: ordenar});
         }
 
+        
         // Etapa 7 -  Paginación
         const desde = req.query.desde ? Number(req.query.desde) : 0;
         const limit = req.query.limit ? Number(req.query.limit) : 0;       

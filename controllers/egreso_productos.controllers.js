@@ -160,7 +160,8 @@ const egresoParcial = async (req, res) => {
         success(res, { resultado });
 
     }catch(err){
-        console.log()
+        console.log(chalk.red(err));
+        error(res, 500);
     }
 }
 

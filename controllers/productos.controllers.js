@@ -99,12 +99,12 @@ const listarProductos = async (req, res) => {
         pipeline.push({$skip: desde});
         
         // Se obtienen los datos
-        const [productos, total] = await Promise.all([
+        const [productos, total, totalGeneral] = await Promise.all([
             Producto.aggregate(pipeline),
             Producto.find(busqueda)
                     .or(filtroCodigo)
                     .or(filtroDescripcion)
-                    .countDocuments()    
+                    .countDocuments()
         ]);
 
         success(res, { productos, total });    

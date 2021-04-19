@@ -1,37 +1,5 @@
 const { Schema, model } = require('mongoose');
 
-// Productos - Entrada
-const productoSchema = Schema({
-
-    codigo: {
-        type: String,
-        trim: true,
-        uppercase: true,
-        required: 'Codigo es un campo obligatorio'
-    },
-
-    descripcion: {
-        type: String,
-        trim: true,
-        uppercase: true,
-        required: 'Descripcion es un campo obligatorio'
-    },
-
-    unidad_medida: {
-        type: String,
-        trim: true,
-        uppercase: true,
-        required: 'La unidad de medida es un campo obligatorio'     
-    },
-
-    cantidad: {
-        type: Number,
-        min: 0,
-        required: 'La cantidad es un campo obligatorio'
-    }
-
-});
-
 // Remito de ingreso
 const ingresoSchema = Schema({
 
@@ -62,9 +30,6 @@ const ingresoSchema = Schema({
         type: Boolean,
         default: true
     },
-
-    // Datos de productos
-    productos: [productoSchema]
 
 },{
     timestamps: true

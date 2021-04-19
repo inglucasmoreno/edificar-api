@@ -19,6 +19,7 @@
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.1",
     "mongoose": "^5.10.6",
+    "pdf-creator-node": "^2.2.2",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

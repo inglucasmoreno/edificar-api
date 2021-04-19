@@ -36,6 +36,10 @@ app.use('/api/egresos', require('./routes/egreso.routes'));
 app.use('/api/ingreso_productos', require('./routes/ingreso_productos.routes'));
 app.use('/api/egreso_productos', require('./routes/egreso_productos.routes'));
 app.use('/api/trazabilidad', require('./routes/trazabilidad.routes'));
+app.use('/api/presupuestos', require('./routes/presupuestos.routes'));
+
+// Documentacion publica
+app.use('/docs', express.static(path.join(__dirname, 'docs')));
 
 // [Necesario para no perder la ruta en produccion]
 app.get('*', (req, res) => {

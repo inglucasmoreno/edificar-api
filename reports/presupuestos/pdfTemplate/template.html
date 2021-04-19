@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <style>
+    /* CSS de PDF */
+
+    *{
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Estilos de tabla */
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      font-size: 11px;
+      background: #f2f2f2;
+      color: black;
+      border-collapse: collapse;
+      height: 30px;
+    }
+
+    tr {
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    td {
+      border-bottom: 1px solid #f2f2f2;
+      height: 40px;
+    }
+
+    /* Encabezado */
+    
+    .membrete {
+      width: 700px;
+    }
+
+    /* Datos de cliente */
+    .cliente {
+      font-size: 12px;
+      border: 1px solid #f2f2f2;
+      padding: 10px;
+      background: #f2f2f2;
+    }
+
+  </style>
+  <head>
+    <mate charest="utf-8" />
+    <title> Presupuesto </title>
+  </head>
+  <body>
+    <!-- <img class="membrete" src="http://localhost:3000/assets/Logo-PDF-2.png" alt="Membrete.png">  -->
+    
+    <div class="cliente">
+      <div style="font-weight: bold; font-size: large;"> Cliente </div>
+      <div> {{ cliente.descripcion }} </div>
+      <div> {{ cliente.tipoIdentificacion }} {{ cliente.identificacion }} </div>
+    </div>
+    
+    <table style="margin-top: 10px;">
+      <tr style="font-weight: bold; font-size: 12px;">
+        <td> Presupuesto Nro. {{nro_presupuesto}} </td>
+        <td> Fecha: {{fecha}} </td>
+      </tr>
+    </table>
+    <table>
+      <tr>
+        <th> Producto </th>
+        <th> Unidad </th>
+        <th> Cantidad </th>
+        <th> Precio (c/u) </th>
+        <th> Total </th>
+      </tr>
+      {{#each productos}}
+      <tr class="fila">
+        <td style="width: 250px; font-size: 10px;"> {{descripcion}} </td>
+        <td style="width: 160px; font-size: 10px;"> {{unidad_medida}} </td>
+        <td style="width: 80px;"> {{cantidad}} </td>   
+        <td> ${{precio}} </td>
+        <td> ${{total}} </td>        
+      </tr>
+      {{/each}}
+      <tr>
+        <td style="border: none"></td>
+        <td style="border: none"></td>
+        <td style="border: none"></td>
+        <td style="border: none; font-weight: bold; background: #f2f2f2; font-size: 12px;"> Precio total </td>
+        <td style="border: none; font-weight: bold; background: #f2f2f2; font-size: 12px;"> ${{total}} </td>
+      </tr>
+    </table>
+
+
+  </body>
+</html>

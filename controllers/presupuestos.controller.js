@@ -55,9 +55,9 @@ const generarPresupuesto = async (req, res) => {
       footer: {
           height: "28mm",
           contents: {
-              first: '<p style="color: #444; font-size: 13px; font-weight: bold; background: #f2f2f2; padding: 10px; text-align:center;"> Estos precios pueden variar sin previo aviso </p>',
+              first: '<p style="color: #444; font-size:10px; background: #f2f2f2; padding: 10px; text-align:center;"> Estos precios pueden variar sin previo aviso </p>',
               2: 'Second page', // Any page number is working. 1-based index
-              default: '<p style="color: #444; font-size: 13px; font-weight: bold; background: #f2f2f2; padding: 10px; text-align:center;"> Estos precios pueden variar sin previo aviso </p>', // fallback value
+              default: '<p style="color: #444; font-size:10px; background: #f2f2f2; padding: 10px; text-align:center;"> Estos precios pueden variar sin previo aviso </p>', // fallback value
               last: 'Last Page'
           }
       }

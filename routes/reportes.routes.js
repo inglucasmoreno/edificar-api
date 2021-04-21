@@ -1,10 +1,13 @@
 const { Router } = require('express');
 const {
-    getReporte
+    usuarios,
+    productos
 } = require('../controllers/reportes.controllers');
 
 const router = Router();
 
-router.get('/usuarios' , getReporte);
+router.get('/usuarios' , usuarios);
+router.get('/productos', productos);
+
 
 module.exports = router;

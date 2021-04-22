@@ -1,13 +1,23 @@
 const { Router } = require('express');
+const { validarJWT } = require('../middleware/validar-jwt');
 const {
     usuarios,
-    productos
+    productos,
+    trazabilidad,
+    unidad_medida,
+    ingresos,
+    egresos,
+    proveedores
 } = require('../controllers/reportes.controllers');
 
 const router = Router();
 
-router.get('/usuarios' , usuarios);
-router.get('/productos', productos);
-
+router.get('/usuarios', validarJWT, usuarios);
+router.get('/productos', validarJWT, productos);
+router.get('/unidades', validarJWT, unidad_medida);
+router.get('/ingresos', validarJWT, ingresos);
+router.get('/egresos', validarJWT, egresos);
+router.get('/proveedores', validarJWT, proveedores);
+router.get('/trazabilidad', validarJWT, trazabilidad);
 
 module.exports = router;

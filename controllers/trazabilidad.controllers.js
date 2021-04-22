@@ -57,17 +57,27 @@ const listarTrazabilidad = async (req, res) => {
             }},
         );
         pipeline.push({ $unwind: '$producto' });
+
+        // Etapa 6 - Join (Producto -> Unidad de medida)   
+        pipeline.push(
+            { $lookup: { // Lookup - Tipos
+                from: 'unidad_medida',
+                localField: 'producto.unidad_medida',
+                foreignField: '_id',
+                as: 'producto.unidad_medida'
+            }},
+        );
+        pipeline.push({ $unwind: '$producto.unidad_medida' });
         
         const ordenar = {};    
         
-        // Etapa 6 - Ordenando datos
+        // Etapa 7 - Ordenando datos
         if(req.query.columna){
             ordenar[req.query.columna] = Number(req.query.direccion); 
             pipeline.push({$sort: ordenar});
         }
 
-        
-        // Etapa 7 -  Paginación
+        // Etapa 8 -  Paginación
         const desde = req.query.desde ? Number(req.query.desde) : 0;
         const limit = req.query.limit ? Number(req.query.limit) : 0;       
         if(limit != 0) pipeline.push({$limit: limit});

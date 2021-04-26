@@ -3,6 +3,7 @@ const ExcelJs = require('exceljs');
 const chalk = require('chalk');
 const { error } = require('../helpers/response');
 const moment = require('moment');
+const mongoose = require('mongoose');
 
 const Usuario = require('../models/usuario.model');
 const Producto = require('../models/producto.model');
@@ -56,7 +57,7 @@ const usuarios = async (req, res) => {
             { header: 'Usuario', key: 'usuario', width:30 },
             { header: 'Rol', key: 'rol', width: 17 },
             { header: 'Email', key: 'email', width: 35 },
-            { header: 'estado', key: 'estado', width: 10 }
+            { header: 'Estado', key: 'estado', width: 10 }
         ];
         
         usuarios.forEach( usuario => {
@@ -125,7 +126,7 @@ const unidad_medida = async (req, res) => {
         worksheet.columns = [
             { header: 'Fecha de creación', key: 'fecha', width: 18 },
             { header: 'Descripción', key: 'descripcion', width: 35 },
-            { header: 'estado', key: 'estado', width:18 },
+            { header: 'Estado', key: 'estado', width:18 },
         ];
         
         unidades.forEach( unidad => {
@@ -191,8 +192,8 @@ const proveedores = async (req, res) => {
             { header: 'Razon social', key: 'razon_social', width: 35 },
             { header: 'Cuit', key: 'cuit', width:18 },
             { header: 'Condicion frente al IVA', key: 'condicion_iva', width:35 },
-            { header: 'domicilio', key: 'domicilio', width:35 },
-            { header: 'estado', key: 'estado', width:18 },
+            { header: 'Domicilio', key: 'domicilio', width:35 },
+            { header: 'Estado', key: 'estado', width:18 },
         ];
         
         proveedores.forEach( proveedor => {
@@ -282,7 +283,7 @@ const productos = async (req, res) => {
             { header: 'Stock actual', key: 'stock_actual', width: 20 },
             { header: '¿Stock minimo?', key: 'stock_minimo', width: 20 },
             { header: '¿Cantidad minima?', key: 'cantidad_minima', width: 20 },
-            { header: 'estado', key: 'estado', width: 15 }
+            { header: 'Estado', key: 'estado', width: 15 }
         ];
 
         productos.forEach( producto => {
@@ -368,7 +369,7 @@ const ingresos = async (req, res) => {
             { header: 'Proveedor (CUIT)', key: 'proveedor_cuit', width: 35 },
             { header: 'Fecha creación', key: 'fecha_creacion', width: 20 },
             { header: 'Fecha cierre', key: 'fecha_cierre', width: 20 },
-            { header: 'estado', key: 'estado', width: 18 }
+            { header: 'Estado', key: 'estado', width: 18 }
         ];
 
         ingresos.forEach( ingreso => {
@@ -441,7 +442,7 @@ const egresos = async (req, res) => {
             { header: 'Cliente - Identificación', key: 'cliente_identificacion', width: 35 },
             { header: 'Fecha creación', key: 'fecha_creacion', width: 20 },
             { header: 'Fecha cierre', key: 'fecha_cierre', width: 20 },
-            { header: 'estado', key: 'estado', width: 18 }
+            { header: 'Estado', key: 'estado', width: 18 }
         ];
 
         egresos.forEach( egreso => {

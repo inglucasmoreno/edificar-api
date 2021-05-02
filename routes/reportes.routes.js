@@ -7,11 +7,13 @@ const {
     unidad_medida,
     ingresos,
     egresos,
-    proveedores
+    proveedores,
+    guiaUsuario
 } = require('../controllers/reportes.controllers');
 
 const router = Router();
 
+router.get('/guia', guiaUsuario);
 router.get('/usuarios', validarJWT, usuarios);
 router.get('/productos', validarJWT, productos);
 router.get('/unidades', validarJWT, unidad_medida);

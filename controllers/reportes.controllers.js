@@ -13,6 +13,19 @@ const Ingreso = require('../models/ingreso.model');
 const Egreso = require('../models/egreso.model');
 const Proveedor = require('../models/proveedor.model');
 
+// Guia de usuario
+const guiaUsuario = async (req, res) => {
+    try{
+        const relativeGuia = `../docs/guia_usuario/Guia.pdf`;
+        const pathGuia = path.join(__dirname, relativeGuia);
+        res.sendFile(pathGuia);
+    }catch(error){
+        console.log(chalk.red(error));
+        error(res, 500);        
+    }
+}
+
+
 // Reporte - Usuarios
 const usuarios = async (req, res) => {
     try{
@@ -593,6 +606,7 @@ const trazabilidad = async (req, res) => {
 
 
 module.exports = {
+    guiaUsuario,
     usuarios,
     unidad_medida,
     proveedores,

@@ -12,6 +12,9 @@ const nuevoProducto = async (req, res) => {
     try{
         const {egreso, producto, cantidad} = req.body;
 
+        // Cantidad restante de entrega
+        req.body.cantidad_restante = cantidad;
+
         // Se verifica si el egreso existe
         const egresoExiste = await Egreso.findById(egreso);
         if(!egresoExiste) return error(res, 400, 'El egreso no existe');
@@ -194,37 +197,10 @@ const completarEgreso = async (req, res) => {
 
         // Se buscan los productos que faltan ingresar
         const productos_egreso = await EgresoProducto.find({ egreso, activo: true }, 'producto cantidad');
-    
+        if(productos_egreso.length !== 0) return error(res, 400, 'Debe entregar todos los productos')
+
         // Se impacta sobre la trazabilidad
-        const { documento_codigo, persona_empresa } = req.body;
-
-        // Se opera sobre cada producto de forma individual
-        productos_egreso.forEach( async elemento => {
-            
-            // Info de producto antes de actualizacion
-            const productoAnterior = await Producto.findById(elemento.producto, 'cantidad');
-            if(!productoAnterior) return error(res, 400, 'El producto no existe');
-
-            // Se impacta sobre el stock
-            const productoActualizado = await Producto.findByIdAndUpdate(elemento.producto, { $inc: { cantidad: -elemento.cantidad } }, {new: true});
-         
-            const dataTrazabilidad = {
-                producto: elemento.producto,
-                cantidad: elemento.cantidad,
-                tipo: 'Egreso',
-                stock_anterior: productoAnterior.cantidad,
-                stock_nuevo: productoActualizado.cantidad,
-                documento: egreso,
-                documento_codigo,
-                persona_empresa 
-            }
-
-            const trazabilidad = Trazabilidad(dataTrazabilidad);
-            await trazabilidad.save();
-          
-            // Se actualiza el estado y la fecha del producto en egreso
-            await EgresoProducto.findByIdAndUpdate(elemento._id, {activo: false, fecha_egreso: Date.now() });  
-        });
+        // const { documento_codigo, persona_empresa } = req.body;
 
         // Se completa el ingreso
         const resultado = await Egreso.findByIdAndUpdate(egreso, { estado: 'Completado', activo: false, fecha_egreso: Date.now() });

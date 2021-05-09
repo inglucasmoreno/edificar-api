@@ -35,6 +35,7 @@ app.use('/api/ingresos', require('./routes/ingreso.routes'));
 app.use('/api/egresos', require('./routes/egreso.routes'));
 app.use('/api/ingreso_productos', require('./routes/ingreso_productos.routes'));
 app.use('/api/egreso_productos', require('./routes/egreso_productos.routes'));
+app.use('/api/remitos_entrega', require('./routes/remitos_entrega.routes'));
 app.use('/api/trazabilidad', require('./routes/trazabilidad.routes'));
 app.use('/api/presupuestos', require('./routes/presupuestos.routes'));
 

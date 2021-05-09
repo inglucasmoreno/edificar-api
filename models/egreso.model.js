@@ -38,7 +38,6 @@ const egresoSchema = Schema({
         required: 'La identificacion del cliente es un campo obligatorio'        
     },
 
-
     fecha_egreso: {
         type: Date,
         default: Date.now()

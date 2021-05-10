@@ -5,12 +5,16 @@ const { validarCampos } = require('../middleware/validar-campos');
 const {
     nuevoRemitoEntrega, 
     listarRemitosPorEgreso,
-    entregaParcial
+    entregaParcial,
+    getRemitoEntrega,
+    listarProductosRemito
 } = require('../controllers/remitos_egreso.controllers');
 
 const router = Router();
 
 router.get('/:id', validarJWT, listarRemitosPorEgreso);
+router.get('/getRemito/:id', validarJWT, getRemitoEntrega);
+router.get('/getProductos/:id', validarJWT, listarProductosRemito);
 router.post('/', [
     validarJWT,
     check('dato_1', 'El dato_1 es obligatorio').not().isEmpty(),

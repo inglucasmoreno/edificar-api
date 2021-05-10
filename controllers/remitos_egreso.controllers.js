@@ -4,6 +4,7 @@ const RemitoEntrega = require('../models/remito_entrega.model');
 const ProductosEgreso = require('../models/egreso_productos.model');
 const Producto = require('../models/producto.model');
 const RemitoProducto = require('../models/remito_entrega_productos.model');
+const mongoose = require('mongoose');
 
 // Se listan las entregas
 const listarRemitosPorEgreso = async (req, res) => {
@@ -34,7 +35,7 @@ const entregaParcial = async (req, res) => {
             // Nuevo producto para remito de entrega
             const productoRemito = new RemitoProducto({
                 remito_entrega: remitoDB._id,
-                producto: producto.id,
+                producto: productoDB.producto,
                 cantidad: producto.cantidad     
             });
 
@@ -71,7 +72,7 @@ const entregaParcial = async (req, res) => {
     }
 }
 
-// Se crea un nueva entrega
+// Se crea un nueva entrega - Entrega total
 const nuevoRemitoEntrega = async (req, res) => {
     const hoy = Date.now();
     try{
@@ -114,8 +115,64 @@ const nuevoRemitoEntrega = async (req, res) => {
     }
 }
 
+// Se traen los datos del remito
+const getRemitoEntrega = async (req, res) => {
+    try{
+        const remito = await RemitoEntrega.findById(req.params.id);
+        success(res, { remito });
+    }catch(err){
+        console.log(chalk.red(err));
+        error(res, 500);
+    }
+}
+
+// Listar productos del remito 
+const listarProductosRemito = async (req, res) => {
+    try{
+
+        let pipeline = [];
+
+        // Etapa 1 - Filtro por remito
+        pipeline.push({$match: {remito_entrega: mongoose.Types.ObjectId(req.params.id)}});
+    
+        // Etapa 2 - LookUp - Productos
+        pipeline.push(
+            { $lookup: { // Lookup - Producto
+                from: 'productos',
+                localField: 'producto',
+                foreignField: '_id',
+                as: 'producto'
+            }},
+        );
+        pipeline.push({ $unwind: '$producto' });
+        
+        // Etapa 3 - LookUp - Producto -> Unidad de medida
+        pipeline.push(
+            { $lookup: { // Lookup - Producto
+                from: 'unidad_medida',
+                localField: 'producto.unidad_medida',
+                foreignField: '_id',
+                as: 'producto.unidad_medida'
+            }},
+        );
+        pipeline.push({ $unwind: '$producto.unidad_medida' });
+        
+        // Etapa 4 - Ordenamiento
+        pipeline.push({$sort: { createdAt: -1 }});
+
+        const productos = await RemitoProducto.aggregate(pipeline);
+
+        success(res, { productos });
+    }catch(err){
+        console.log(chalk.red(err));
+        error(res, 500);
+    }
+}
+
 module.exports = {
+    getRemitoEntrega,
     listarRemitosPorEgreso,
+    listarProductosRemito,
     entregaParcial,
     nuevoRemitoEntrega
 }

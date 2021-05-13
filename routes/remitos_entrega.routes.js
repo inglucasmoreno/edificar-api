@@ -17,15 +17,15 @@ router.get('/getRemito/:id', validarJWT, getRemitoEntrega);
 router.get('/getProductos/:id', validarJWT, listarProductosRemito);
 router.post('/', [
     validarJWT,
-    check('dato_1', 'El dato_1 es obligatorio').not().isEmpty(),
-    check('dato_2', 'El dato_2 es obligatorio').not().isEmpty(),
+    check('punto_venta', 'El punto de venta es obligatorio').not().isEmpty(),
+    check('nro_comprobante', 'El numero de comprobante es obligatorio').not().isEmpty(),
     check('egreso', 'El egreso es obligatorio').not().isEmpty(),
     validarCampos  
 ], nuevoRemitoEntrega);
 router.post('/parcial',[
     validarJWT,
-    check('dato_1', 'El dato_1 es obligatorio').not().isEmpty(),
-    check('dato_2', 'El dato_2 es obligatorio').not().isEmpty(),
+    check('punto_venta', 'El punto de venta es obligatorio').not().isEmpty(),
+    check('nro_comprobante', 'El numero de comprobante es obligatorio').not().isEmpty(),
     check('egreso', 'El egreso es obligatorio').not().isEmpty(),
     check('producto', 'Los productos son obligatorios').not().isEmpty(),
 ], entregaParcial)

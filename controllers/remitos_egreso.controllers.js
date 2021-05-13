@@ -30,8 +30,30 @@ const entregaParcial = async (req, res) => {
         // Datos de egreso
         const egresoDB = await Egreso.findById(egreso);
 
+        // Se genera el numero de remito
+        let { punto_venta, nro_comprobante } = req.body 
+
+        const  r_punto_venta = 4 - punto_venta.length;
+        const  r_nro_comprobante = 8 - nro_comprobante.length;
+        
+        let i = 0;
+        while(i < r_punto_venta){
+            punto_venta = '0' + punto_venta;
+            i++;
+        }
+
+        i = 0;
+        while(i < r_nro_comprobante){
+            nro_comprobante = '0' + nro_comprobante;
+            i++;
+        }
+
+        const numero_remito = `${punto_venta}-${nro_comprobante}`; 
+        
+        const data = {numero_remito, egreso};
+
         // Creación - Remito de entrega
-        const remitoEntrega = new RemitoEntrega(req.body);
+        const remitoEntrega = new RemitoEntrega(data);
         const remitoDB = await remitoEntrega.save();
         
         // -- SE ENTREGAN LOS PRODUCTOS --
@@ -105,8 +127,30 @@ const nuevoRemitoEntrega = async (req, res) => {
         // Datos de egreso
         const egresoDB = await Egreso.findById(egreso);
 
+        // Se genera el numero de remito
+        let { punto_venta, nro_comprobante } = req.body 
+
+        const  r_punto_venta = 4 - punto_venta.length;
+        const  r_nro_comprobante = 8 - nro_comprobante.length;
+        
+        let i = 0;
+        while(i < r_punto_venta){
+            punto_venta = '0' + punto_venta;
+            i++;
+        }
+
+        i = 0;
+        while(i < r_nro_comprobante){
+            nro_comprobante = '0' + nro_comprobante;
+            i++;
+        }
+
+        const numero_remito = `${punto_venta}-${nro_comprobante}`; 
+        
+        const data = {numero_remito, egreso};
+
         // Creación - Nuevo remito de entrega
-        const remitoEntrega = new RemitoEntrega(req.body);
+        const remitoEntrega = new RemitoEntrega(data);
         const remitoDB = await remitoEntrega.save();
 
         // -- SE ENTREGAN LOS PRODUCTOS --

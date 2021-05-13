@@ -1,17 +1,11 @@
 const { Schema, model } = require('mongoose');
 
 const remitoEntregaSchema = Schema({
-    dato_1: {
+    numero_remito: {
         type: String,
         trim: true,
         uppercase: true,
-        required: 'El dato_1 es obligatorio'    
-    },
-    dato_2: {
-        type: String,
-        trim: true,
-        uppercase: true,
-        required: 'El dato_2 es obligatorio'    
+        required: 'El numero de remito es obligatorio'    
     },
     egreso: { // Nota de venta
         type: Schema.Types.ObjectId,

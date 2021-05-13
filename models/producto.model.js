@@ -45,7 +45,7 @@ const productoSchema = Schema({
     precio: {
         type: Number, // revisar decimales
         required: 'Precio es un campo obligatorio',
-        min: 0
+        // min: 0
     },
    
     activo: {

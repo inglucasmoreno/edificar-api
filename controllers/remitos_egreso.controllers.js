@@ -49,6 +49,10 @@ const entregaParcial = async (req, res) => {
         }
 
         const numero_remito = `${punto_venta}-${nro_comprobante}`; 
+
+        // Se verifica si el remito ya exite
+        const existeRemito = await RemitoEntrega.findOne({numero_remito, egreso});
+        if(existeRemito) return error(res, 400, 'El remito ya esta registrado');
         
         const data = {numero_remito, egreso};
 
@@ -146,6 +150,10 @@ const nuevoRemitoEntrega = async (req, res) => {
         }
 
         const numero_remito = `${punto_venta}-${nro_comprobante}`; 
+
+        // Se verifica si el remito ya exite
+        const existeRemito = await RemitoEntrega.findOne({numero_remito, egreso});
+        if(existeRemito) return error(res, 400, 'El remito ya esta registrado');
         
         const data = {numero_remito, egreso};
 

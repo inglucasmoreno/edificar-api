@@ -55,9 +55,9 @@ const generarPresupuesto = async(req, res) => {
         footer: {
             height: "28mm",
             contents: {
-                first: '<ul style="color: #444; list-style-type: circle; font-size:9px; border-style:solid; padding-top: 10px; padding-bottom: 10px; border-width:1px; border-color:gray;"><li> Estos precios pueden variar sin previo aviso </li> <li> Material a retirar por el cliente </li> <li> Plazo de entrega a convenir </li> <li> Precios finales - Incluyen IVA </li></ul>',
+                first: '<ul style="color: #444; list-style-type: circle; font-size:9px; border-style:solid; padding-top: 10px; padding-bottom: 10px; border-width:1px; border-color:gray;"><li> Estos precios pueden variar sin previo aviso. </li> <li> Material a retirar por el cliente. </li> <li> Plazo de entrega a convenir. </li> <li> Precios finales - Incluyen IVA. </li></ul>',
                 2: 'Second page', // Any page number is working. 1-based index
-                default: '<p style="color: #444; font-size:10px; background: #f2f2f2; padding: 10px; text-align:center;"> Estos precios pueden variar sin previo aviso </p>', // fallback value
+                default: '<ul style="color: #444; list-style-type: circle; font-size:9px; border-style:solid; padding-top: 10px; padding-bottom: 10px; border-width:1px; border-color:gray;"><li> Estos precios pueden variar sin previo aviso. </li> <li> Material a retirar por el cliente. </li> <li> Plazo de entrega a convenir. </li> <li> Precios finales - Incluyen IVA. </li></ul>', // fallback value
                 last: 'Last Page'
             }
         }

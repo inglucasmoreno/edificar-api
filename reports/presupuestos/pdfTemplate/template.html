@@ -1,101 +1,100 @@
 <!DOCTYPE html>
 <html>
-  <style>
+<style>
     /* CSS de PDF */
-
-    *{
-      box-sizing: border-box;
-      font-family: Arial, Helvetica, sans-serif;
+    
+    * {
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
     }
-
     /* Estilos de tabla */
     
     table {
-      width: 100%;
-      border-collapse: collapse;
+        width: 100%;
+        border-collapse: collapse;
     }
-
+    
     th {
-      background: #f2f2f2;
-      color: black;
-      border-collapse: collapse;
-      height: 30px;
+        background: #f2f2f2;
+        color: black;
+        border-collapse: collapse;
+        height: 30px;
     }
-
+    
     tr {
-      border-collapse: collapse;
-      text-align: center;
+        border-collapse: collapse;
+        text-align: center;
     }
-
+    
     td {
-      border-bottom: 1px solid #f2f2f2;
-      height: 40px;
+        border-bottom: 1px solid #f2f2f2;
+        height: 40px;
     }
-
     /* Encabezado */
     
     .membrete {
-      width: 525px;
-      margin-left: 0px;
+        width: 525px;
+        margin-left: 0px;
     }
-
     /* Datos de cliente */
+    
     .cliente {
-      border: 1px solid #f2f2f2;
-      padding: 10px;
-      background: #f2f2f2;
+        border: 1px solid #f2f2f2;
+        padding: 10px;
+        background: #f2f2f2;
     }
+</style>
 
-  </style>
-  <head>
+<head>
     <mate charest="utf-8" />
     <title> Presupuesto </title>
-  </head>
-  <body style="font-family: Arial, Helvetica, sans-serif;">
-    <img class="membrete" src="http://localhost:3000/docs/img/membrete.png" alt="Membrete.png"> 
-    
+</head>
+
+<body style="font-family: Arial, Helvetica, sans-serif;">
+    <img class="membrete" src="http://localhost:3000/docs/img/membrete.png" alt="Membrete.png">
+
     <div class="cliente">
-      <div style="font-weight: bold; font-size: 13px;"> Cliente </div>
+        <div style="font-weight: bold; font-size: 13px;"> Cliente </div>
         <div style="margin-left: 10px;">
-          <div style="font-size:8px; margin-top: 3px;"> {{ cliente.descripcion }} </div>
-          <div style="font-size:8px; margin-top: 3px;"> {{ cliente.tipoIdentificacion }} {{ cliente.identificacion }} </div>
-          <div style="font-size:8px; margin-top: 3px;"> Tel. {{ cliente.telefono }} </div>
-          <div style="font-size:8px; margin-top: 3px;"> {{ cliente.correo }} </div>
+            <div style="font-size:8px; margin-top: 3px;"> {{ cliente.descripcion }} </div>
+            <div style="font-size:8px; margin-top: 3px;"> {{ cliente.tipoIdentificacion }} {{ cliente.identificacion }} </div>
+            <div style="font-size:8px; margin-top: 3px;"> Tel. {{ cliente.telefono }} </div>
+            <div style="font-size:8px; margin-top: 3px;"> {{ cliente.correo }} </div>
         </div>
     </div>
-    
+
     <table style="margin-top: 10px;">
-      <tr>
-        <td style="font-size:9px"> Presupuesto Nro. {{nro_presupuesto}} </td>
-        <td style="font-size:9px"> Fecha: {{fecha}} </td>
-      </tr>
+        <tr>
+            <td style="font-size:9px"> Presupuesto Nro. {{nro_presupuesto}} </td>
+            <td style="font-size:9px"> Fecha: {{fecha}} </td>
+        </tr>
     </table>
     <table>
-      <tr>
-        <th style="font-size:8px; text-align:left"> &nbsp; Productos </th>
-        <th style="font-size:8px"> Unidad </th>
-        <th style="font-size:8px"> Cantidad </th>
-        <th style="font-size:8px"> Precio </th>
-        <th style="font-size:8px"> Total </th>
-      </tr>
-      {{#each productos}}
-      <tr>
-        <td style="width:250px; text-align:left; font-size:8px;"> {{descripcion}} </td>
-        <td style="width:160px; font-size:8px;"> {{unidad_medida}} </td>
-        <td style="width:60px; font-size:8px"> {{cantidad}} </td>   
-        <td style="width:90px; font-size:8px"> ${{precio}} </td>
-        <td style="width:90px; font-size:8px"> ${{total}} </td>        
-      </tr>
-      {{/each}}
-      <tr>
-        <td style="border: none"></td>
-        <td style="border: none"></td>
-        <td style="border: none"></td>
-        <td style="border: none; font-weight: bold; background: #f2f2f2; font-size:8px;"> Precio total </td>
-        <td style="border: none; font-weight: bold; background: #f2f2f2; font-size:8px;"> ${{total}} </td>
-      </tr>
+        <tr>
+            <th style="font-size:8px; text-align:left"> &nbsp; Productos </th>
+            <th style="font-size:8px"> Unidad </th>
+            <th style="font-size:8px"> Cantidad </th>
+            <th style="font-size:8px"> Precio </th>
+            <th style="font-size:8px"> Total </th>
+        </tr>
+        {{#each productos}}
+        <tr>
+            <td style="width:250px; text-align:left; font-size:8px;"> {{descripcion}} </td>
+            <td style="width:160px; font-size:8px;"> {{unidad_medida}} </td>
+            <td style="width:60px; font-size:8px"> {{cantidad}} </td>
+            <td style="width:90px; font-size:8px"> ${{precio}} </td>
+            <td style="width:90px; font-size:8px"> ${{total}} </td>
+        </tr>
+        {{/each}}
+        <tr>
+            <td style="border: none"></td>
+            <td style="border: none"></td>
+            <td style="border: none"></td>
+            <td style="border: none; font-weight: bold; background: #f2f2f2; font-size:8px;"> Precio total </td>
+            <td style="border: none; font-weight: bold; background: #f2f2f2; font-size:8px;"> ${{total}} </td>
+        </tr>
     </table>
 
+</body>
 
-  </body>
 </html>

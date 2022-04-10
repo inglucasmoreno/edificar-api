@@ -55,9 +55,9 @@ const generarPresupuesto = async(req, res) => {
         footer: {
             height: "28mm",
             contents: {
-                first: '<ul style="color: #444; list-style-type: circle; font-size:9px; border-style:solid; padding-top: 10px; padding-bottom: 10px; border-width:1px; border-color:gray;"><li> Estos precios pueden variar sin previo aviso. </li> <li> Material a retirar por el cliente. </li> <li> Plazo de entrega a convenir. </li> <li> Los precios NO incluyen Impuestos - Precios mas IVA. </li></ul>',
+                first: '<ul style="color: #444; list-style-type: circle; font-size:9px; border-style:solid; padding-top: 10px; padding-bottom: 10px; border-width:1px; border-color:gray;"><li> Estos precios pueden variar sin previo aviso. </li> <li> Material a retirar por el cliente. </li> <li> Plazo de entrega a convenir. </li> <li> Los precios incluyen IVA </li></ul>',
                 2: 'Second page', // Any page number is working. 1-based index
-                default: '<ul style="color: #444; list-style-type: circle; font-size:9px; border-style:solid; padding-top: 10px; padding-bottom: 10px; border-width:1px; border-color:gray;"><li> Estos precios pueden variar sin previo aviso. </li> <li> Material a retirar por el cliente. </li> <li> Plazo de entrega a convenir. </li> <li> Los precios NO incluyen Impuestos - Precios mas IVA. </li></ul>', // fallback value
+                default: '<ul style="color: #444; list-style-type: circle; font-size:9px; border-style:solid; padding-top: 10px; padding-bottom: 10px; border-width:1px; border-color:gray;"><li> Estos precios pueden variar sin previo aviso. </li> <li> Material a retirar por el cliente. </li> <li> Plazo de entrega a convenir. </li> <li> Los precios incluyen IVA </li></ul>', // fallback value
                 last: 'Last Page'
             }
         }

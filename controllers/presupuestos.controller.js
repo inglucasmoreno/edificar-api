@@ -67,6 +67,7 @@ const generarPresupuesto = async(req, res) => {
     var document = {
         html: html,
         data: {
+            url_membrete: 'http://localhost:' + (process.env.PORT || 3000) + '/docs/img/membrete.png',
             productos,
             total,
             fecha,
